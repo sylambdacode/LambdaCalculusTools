@@ -1,0 +1,41 @@
+main = λinput. bytes-to-bits (byte-main (bits-to-bytes input));
+
+byte-main = Y λself input. match-nil-cons-x-xs input
+    nil
+    λx xs. cons (tail (check-and-handle (cons false x))) (self xs);
+
+check-and-handle = λc. do {
+    r <- bits-cmp-cps c char-a;
+    c-ge-a <- r (λcont. cont false) (λcont. cont true) (λcont. cont true);
+    r <- bits-cmp-cps c char-z;
+    c-le-z <- r (λcont. cont true) (λcont. cont true) (λcont. cont false);
+    if-then-else (and c-ge-a c-le-z)
+        (handle c char-a char-z)
+        do {
+            r <- bits-cmp-cps c char-A;
+            c-ge-A <- r (λcont. cont false) (λcont. cont true) (λcont. cont true);
+            r <- bits-cmp-cps c char-Z;
+            c-le-Z <- r (λcont. cont true) (λcont. cont true) (λcont. cont false);
+            if-then-else (and c-ge-A c-le-Z)
+                (handle c char-A char-Z)
+                c
+        }
+};
+
+handle = λc l r. do {
+    add-result <- bits-add-cps c bits-13;
+    cmp-result <- bits-cmp-cps add-result r;
+    cmp-result
+        (add-result) {- add-result < r -}
+        (add-result) {- add-result = r -}
+        (do { {- add-result > r -}
+            sub-result <- bits-sub-cps add-result r;
+            sub-result <- bits-sub-cps sub-result (bits-one sub-result);
+            bits-add-cps sub-result l id
+        })
+};
+bits-13 = cons false (cons false (cons false (cons false (cons false (cons true (cons true (cons false (cons true nil))))))));
+char-a = cons false (cons false (cons true (cons true (cons false (cons false (cons false (cons false (cons true nil))))))));
+char-z = cons false (cons false (cons true (cons true (cons true (cons true (cons false (cons true (cons false nil))))))));
+char-A = cons false (cons false (cons true (cons false (cons false (cons false (cons false (cons false (cons true nil))))))));
+char-Z = cons false (cons false (cons true (cons false (cons true (cons true (cons false (cons true (cons false nil))))))));

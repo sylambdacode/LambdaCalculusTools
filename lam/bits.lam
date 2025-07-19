@@ -1,0 +1,69 @@
+bit-add-cps = λc m n cont. if-then-else (and m n)
+            (cont true c)
+            (if-then-else (or (and m (not n)) (and (not m) n))
+                        (cont c (not c))
+                        (cont false c));
+
+
+bits-iszero-cps = λa cont. foldr-cps (λx y. and (not x) y) true a cont;
+
+bits-op-cps = λop a b cont. do {
+    zip2-result <- zip2-cps a b;
+    map-cps (λp. match-fst-snd p op) zip2-result cont
+};
+
+bits-and-cps = bits-op-cps and;
+bits-xor-cps = bits-op-cps xor;
+bits-not-cps = λa cont. map-cps not a cont;
+
+bits-add-cps' = Y λself. λc m n cont. match-nil-cons-x-xs m
+            (cont c nil)
+            (λmx mxs. do {
+                clow rbitslow <- self c mxs (tail n);
+                cbit rbit <- bit-add-cps clow mx (head n);
+                cont cbit (cons rbit rbitslow)
+            });
+
+bits-zero = λa. map (λx. false) a;
+
+bits-one = λa. match-nil-cons-x-xs a
+            ⊥
+            (λx xs. (Y λself. λa. match-nil-cons-x-xs a
+                (cons true nil)
+                (λx xs. cons false (self xs))) xs);
+
+bits-add-cps = λm n cont. do {
+    c r <- bits-add-cps' false m n;
+    cont r
+};
+bits-sub-cps = λm n cont. do {
+    n-not <- bits-not-cps n;
+    c r <- bits-add-cps' true m n-not;
+    cont r
+};
+bits-cmp-ignore-sign-cps = λm n cont. do {
+    r <- bits-sub-cps m n;
+    rx rxs <- r;
+    if-then-else rx
+        (cont λlt eq gt. lt)
+        do {
+            r <- bits-iszero-cps rxs;
+            if-then-else r
+                (cont λlt eq gt. eq)
+                (cont λlt eq gt. gt)
+        }
+};
+bits-cmp-cps = λm n cont. do {
+    mx mxs <- m;
+    nx nxs <- n;
+    let ignore-sign-result = bits-cmp-ignore-sign-cps m n cont;
+    in if-then-else mx
+        {- m < 0 -}
+        (if-then-else nx
+            ignore-sign-result {- n < 0 -}
+            (cont λlt eq gt. lt)) {- n >= 0 -}
+        {- m >= 0 -}
+        (if-then-else nx
+            (cont λlt eq gt. gt) {- n < 0 -}
+            ignore-sign-result) {- n >= 0 -}
+};

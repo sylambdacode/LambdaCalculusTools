@@ -1,0 +1,41 @@
+bytes-to-bits = Y λself l. match-nil-cons l
+            nil
+            do {
+                x xs <- l;
+                r1 <- append-8 x (self xs);
+                r1
+            };
+
+append-8 = λl r cont. do {
+    c1 xs1 <- l;
+    c2 xs2 <- xs1;
+    c3 xs3 <- xs2;
+    c4 xs4 <- xs3;
+    c5 xs5 <- xs4;
+    c6 xs6 <- xs5;
+    c7 xs7 <- xs6;
+    c8 xs8 <- xs7;
+    cont (cons c1 (cons c2 (cons c3 (cons c4 (cons c5 (cons c6 (cons c7 (cons c8 r))))))))
+};
+
+bits-to-bytes = Y λself l. match-nil-cons l
+            nil
+            do {
+                x xs <- take-8 l;
+                cons x (self xs)
+            };
+
+take-8 = λl cont. do {
+    c1 xs1 <- l;
+    c2 xs2 <- xs1;
+    c3 xs3 <- xs2;
+    c4 xs4 <- xs3;
+    c5 xs5 <- xs4;
+    c6 xs6 <- xs5;
+    c7 xs7 <- xs6;
+    c8 xs8 <- xs7;
+    cont (cons c1 (cons c2 (cons c3 (cons c4 (cons c5 (cons c6 (cons c7 (cons c8 nil)))))))) xs8
+};
+
+
+

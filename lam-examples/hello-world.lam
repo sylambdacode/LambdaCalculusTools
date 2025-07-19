@@ -1,0 +1,17 @@
+main = λinput. bytes-to-bits (byte-main (bits-to-bytes input));
+
+byte-main = λinput. cons char-h (cons char-e (cons char-l (cons char-l (cons char-o (cons char-comma (cons char-space (cons char-w (cons char-o (cons char-r (cons char-l (cons char-d (cons char-EM (cons char-LF nil)))))))))))));
+
+makechar = \b1 b2 b3 b4 b5 b6 b7 b8. cons b1 (cons b2 (cons b3 (cons b4 (cons b5 (cons b6 (cons b7 (cons b8 nil)))))));
+
+char-h = makechar false true true false true false false false;
+char-e = makechar false true true false false true false true;
+char-l = makechar false true true false true true false false;
+char-o = makechar false true true false true true true true;
+char-comma = makechar false false true false true true false false;
+char-space = makechar false false true false false false false false;
+char-w = makechar false true true true false true true true;
+char-r = makechar false true true true false false true false;
+char-d = makechar false true true false false true false false;
+char-LF = makechar false false false false true false true false;
+char-EM = makechar false false true false false false false true;

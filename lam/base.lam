@@ -1,0 +1,68 @@
+true = λx y. x;
+false = λx y. y;
+and = λa b. a b a;
+or = λa b. a a b;
+not = λa. a false true;
+xor = λa b. a (not b) b;
+if-then-else = λc. c;
+
+pair = λx y f. f x y;
+fst = λp. p true;
+snd = λp. p false;
+match-fst-snd = λp. p;
+
+nil = false;
+cons = pair;
+head = fst;
+tail = snd;
+isnil = λl. (λa. a (λb c d. false) true) l;
+match-nil-cons = λl n c. if-then-else (isnil l)
+                        (n)
+                        (c);
+match-nil-cons-x-xs = λl n c. match-nil-cons l n (l c);
+Y = (λu x. x (u u x)) (λu x. x (u u x));
+reserve = λl. (Y λself. λl1 l2. match-nil-cons-x-xs l1
+            (l2)
+            (λx xs. self xs (cons x l2)))
+        l nil;
+concat = λl1 l2. (Y λself. λrl1 l2. match-nil-cons-x-xs rl1
+            (l2)
+            (λ x xs. self xs (cons x l2)))
+            (reserve l1) l2;
+
+map = Y λself. λf l. match-nil-cons-x-xs l
+            nil
+            λx xs. cons (f x) (self f xs);
+
+map-cps = Y λself. λf l cont. match-nil-cons-x-xs l
+            (cont nil)
+            λx xs. do {
+                r <- self f xs;
+                cont (cons (f x) r)
+            };
+
+fold = Y λself. λf init l. match-nil-cons-x-xs l
+            init
+            λx xs. self f (f init x) xs;
+
+foldr-cps = Y λself. λf init l cont. match-nil-cons-x-xs l
+            (cont init)
+            λx xs. do {
+                r <- self f init xs;
+                cont (f x r)
+            };
+
+zip2 = Y λself. λl1 l2. match-nil-cons-x-xs l1
+            nil
+            λx xs. cons (pair x (head l2)) (self xs (tail l2));
+
+zip2-cps = Y λself. λl1 l2 cont. match-nil-cons-x-xs l1
+            (cont nil)
+            λx xs. do {
+                xl2 xsl2 <- l2;
+                r <- self xs (xsl2);
+                cont (cons (pair x xl2) r)
+            };
+
+
+id = λx. x;
