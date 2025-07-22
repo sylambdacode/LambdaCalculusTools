@@ -17,3 +17,9 @@ normalOrderBetaReduce (Application functionLambdaTerm argumentLambdaTerm) =
         else Application functionLambdaTermResult argumentLambdaTerm
     where functionLambdaTermResult = normalOrderBetaReduce functionLambdaTerm
 
+
+calculateNormalResult lambdaTerm =
+    if alphaEq Map.empty lambdaTerm newLambdaTerm
+        then newLambdaTerm
+        else calculateNormalResult newLambdaTerm
+    where newLambdaTerm = normalOrderBetaReduce lambdaTerm
