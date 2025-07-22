@@ -58,6 +58,7 @@ parseValDef = ValDef
 parseValDefs :: Parser [ValDef]
 parseValDefs = many parseValDef
 
+parseCode :: SourceName -> String -> Either ParseError [ValDef]
 parseCode codeName code = parse parseValDefs codeName code
 
 lambdaTermList :: [LambdaTerm] -> LambdaTerm
