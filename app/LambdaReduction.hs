@@ -2,7 +2,6 @@ module LambdaReduction where
 
 import LambdaTerm
 
-import Data.Map (Map)
 import qualified Data.Map as Map
 
 
@@ -18,6 +17,7 @@ normalOrderBetaReduce (Application functionLambdaTerm argumentLambdaTerm) =
     where functionLambdaTermResult = normalOrderBetaReduce functionLambdaTerm
 
 
+calculateNormalResult :: LambdaTerm -> LambdaTerm
 calculateNormalResult lambdaTerm =
     if alphaEq Map.empty lambdaTerm newLambdaTerm
         then newLambdaTerm

@@ -62,11 +62,13 @@ parseCode :: SourceName -> String -> Either ParseError [ValDef]
 parseCode codeName code = parse parseValDefs codeName code
 
 lambdaTermList :: [LambdaTerm] -> LambdaTerm
+lambdaTermList [] = error "wrong input(lambdaTermList)"
 lambdaTermList (lambdaTerm : otherLambdaTermList) =
     foldl (\l r -> Application l r) lambdaTerm otherLambdaTermList
 
 
 lambdaFunction :: [String] -> LambdaTerm -> LambdaTerm
+lambdaFunction [] _ = error "wrong input(lambdaFunction)"
 lambdaFunction (variableName : []) bodyLambdaTerm =
     Abstraction variableName bodyLambdaTerm
 lambdaFunction (variableName : otherVariableNameList) bodyLambdaTerm =

@@ -14,7 +14,7 @@ testCode :: String
 testCode = """
         plus = \\m n f x.m f (n f x);
         3 = (\\f x.f (f (f x)));
-        2 = (\\f x.f (f x))
+        2 = (\\f x.f (f x));
         main = plus 2 3;
     """
 
