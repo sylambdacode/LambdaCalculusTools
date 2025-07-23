@@ -23,18 +23,29 @@ instance Show ValDef where
     show (ValDef name expr) = show name ++ " = " ++ show expr
 
 
+skipComment :: Parser Char
+skipComment = char '{' *> char '-' *> skipComment'
+    where skipComment' =
+            (many $ satisfy (\c -> not (c == '-')))
+            *> char '-'
+            *> ((try $ char '}') <|> skipComment')
+
 skipWhiteChar :: Parser String
 skipWhiteChar = many $ satisfy (`elem` " \n\t")
 
+skipWhiteCharAndComment :: Parser ()
+skipWhiteCharAndComment = try (skipWhiteChar *> skipComment *> skipWhiteChar >> return ())
+    <|> try (skipWhiteChar >> return ())
+
 parseName :: Parser String
-parseName = skipWhiteChar *> many1 satisfy'
-    where satisfy' = satisfy (\c -> isLetter c || isDigit c || c `elem` "_-")
+parseName = skipWhiteCharAndComment *> many1 satisfy'
+    where satisfy' = satisfy (\c -> isLetter c || isDigit c || c `elem` "'_-")
 
 parseVar :: Parser Expr
 parseVar = Var <$> parseName
 
 parseBracket :: Parser Expr
-parseBracket = skipWhiteChar *> char '(' *> parseExprs <* skipWhiteChar <* char ')'
+parseBracket = skipWhiteCharAndComment *> char '(' *> parseExprs <* skipWhiteCharAndComment <* char ')'
 
 parseExpr :: Parser Expr
 parseExpr = try parseVar <|> try parseBracket <|> try parseLam
@@ -47,16 +58,16 @@ parseExprs = simply . ExprList <$> many1 parseExpr
 
 parseLam :: Parser Expr
 parseLam = Lam
-    <$> (skipWhiteChar *> char '\\' *> many1 (try parseName))
-    <*> (skipWhiteChar *> char '.' *> parseExprs)
+    <$> (skipWhiteCharAndComment *> char '\\' *> many1 (try parseName))
+    <*> (skipWhiteCharAndComment *> char '.' *> parseExprs)
 
 parseValDef :: Parser ValDef
 parseValDef = ValDef
     <$> parseName
-    <*> (skipWhiteChar *> char '=' *> parseExprs <* skipWhiteChar <* char ';')
+    <*> (skipWhiteCharAndComment *> char '=' *> parseExprs <* skipWhiteCharAndComment <* char ';')
 
 parseValDefs :: Parser [ValDef]
-parseValDefs = many parseValDef
+parseValDefs = many $ try parseValDef
 
 parseCode :: SourceName -> String -> Either ParseError [ValDef]
 parseCode codeName code = parse parseValDefs codeName code

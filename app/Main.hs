@@ -15,6 +15,8 @@ testCode = """
         plus = \\m n f x.m f (n f x);
         3 = (\\f x.f (f (f x)));
         2 = (\\f x.f (f x));
+
+        {- plus 2 3 = \\f x.f (f (f (f (f x)))) -}
         main = plus 2 3;
     """
 
