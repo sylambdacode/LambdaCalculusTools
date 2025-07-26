@@ -3,7 +3,6 @@ module LambdaParser where
 import LambdaTerm
 
 import Text.ParserCombinators.Parsec
-import Data.Char (isLetter, isDigit)
 import Data.Map (Map)
 import qualified Data.Map as Map
 
