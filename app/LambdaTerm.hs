@@ -66,6 +66,6 @@ alphaEq _ _ _ = False
 
 instance Show LambdaTerm where
     show (Variable name) = name
-    show (Abstraction variableName lambdaTerm) = "(\\" ++ variableName ++ "." ++ show lambdaTerm ++ ")"
+    show (Abstraction variableName lambdaTerm) = "(λ" ++ variableName ++ "." ++ show lambdaTerm ++ ")"
     show (Application functionLambdaTerm argumentLambdaTerm) =
         "(" ++ show functionLambdaTerm ++ " " ++ show argumentLambdaTerm ++ ")"

@@ -38,8 +38,7 @@ skipWhiteCharAndComment = try (skipWhiteChar *> skipComment *> skipWhiteChar >> 
     <|> try (skipWhiteChar >> return ())
 
 parseName :: Parser String
-parseName = skipWhiteCharAndComment *> many1 satisfy'
-    where satisfy' = satisfy (\c -> isLetter c || isDigit c || c `elem` "'_-")
+parseName = skipWhiteCharAndComment *> many1 (noneOf "λ\\.(){}=; \n\t")
 
 parseVar :: Parser Expr
 parseVar = Var <$> parseName
@@ -58,7 +57,7 @@ parseExprs = simply . ExprList <$> many1 parseExpr
 
 parseLam :: Parser Expr
 parseLam = Lam
-    <$> (skipWhiteCharAndComment *> char '\\' *> many1 (try parseName))
+    <$> (skipWhiteCharAndComment *> oneOf "\\λ" *> many1 (try parseName))
     <*> (skipWhiteCharAndComment *> char '.' *> parseExprs)
 
 parseValDef :: Parser ValDef
