@@ -2,7 +2,11 @@
 
 module Main where
 
-import LambdaTerm
+import LambdaTerm(LambdaTerm)
+import qualified LambdaTerm as LambdaTerm
+import DeBruijnLambdaTerm(DeBruijnLambdaTerm)
+import qualified DeBruijnLambdaTerm as DeBruijnLambdaTerm
+
 import LambdaReduction
 
 import LambdaParser
@@ -10,7 +14,8 @@ import LambdaParser
 import Data.Map (Map)
 import qualified Data.Map as Map
 
-import OtherTools
+
+import LambdaTermTools
 
 main :: IO ()
 main = do
@@ -20,9 +25,9 @@ main = do
             in case (Map.lookup "main" valDefMap) of
                 Just v -> do
                               putStrLn "开始运行"
-                              putStrLn $ show $ toLambdaTerm valDefMap v
+                              putStrLn $ show $ lambdaTermToDeBruijnLambdaTerm [Map.empty] (toLambdaTerm valDefMap v)
                               putStrLn "---------------------------------------------------------------------------------"
-                              print $ toBoolList $ calculateNormalResult $ toLambdaTerm valDefMap v
+                              print $ calculateNormalResult $ toLambdaTerm valDefMap v
                 Nothing -> print "not found main"
         Left e -> do
             putStrLn "parser error:"
