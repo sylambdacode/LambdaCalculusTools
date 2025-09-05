@@ -1,0 +1,5 @@
+ioWrapper___ = \f.f (\x. x O0___ O1___);
+
+P___ = \in.in;
+
+main = ioWrapper___ ((P___ input___));

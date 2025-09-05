@@ -34,12 +34,20 @@ transWithIO wrapper (-2) = do
     flushStdHandles
     return wrapper
 
+transWithIO wrapper (-3) = do
+    print "input"
+    line <- getLine
+    let value = if line == "1"
+        then DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Variable 1))
+        else DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Variable 2))
+    return $ DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Application (DeBruijnLambdaTerm.Application (DeBruijnLambdaTerm.Variable 1) value) (DeBruijnLambdaTerm.Variable (-3)))
+
 transWithIO _ _ = error "Error"
 
 
 main :: IO ()
 main = do
-    testCode <- getContents
+    testCode <- readFile "test.lam"
     valDefMap <- case parseCode "(test)" testCode of
         Right result -> return $ valDefListToMap result
         Left e -> fail ("parser error: " ++ show e)
@@ -50,11 +58,10 @@ main = do
         Just v -> return $ toLambdaTerm valDefMap v
         Nothing -> fail "not found ioWrapper___"
     
-    let globalFreeVariableMap = Map.fromList [("O0___", -1), ("O1___", -2)]
+    let globalFreeVariableMap = Map.fromList [("O0___", -1), ("O1___", -2), ("input___", -3)]
     let ioWrapperDeBruijnLambdaTerm = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap [Map.empty] ioWrapper
     let deBruijnLambadTerm = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap [Map.empty] mainLambdaTerm
     putStrLn $ show $ mainLambdaTerm
     putStrLn $ show $ deBruijnLambadTerm
-    print ioWrapperDeBruijnLambdaTerm
     r <- krivineMachine (transWithIO ioWrapperDeBruijnLambdaTerm) deBruijnLambadTerm (Environment []) (Environment [])
     return ()
