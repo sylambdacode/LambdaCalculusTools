@@ -67,7 +67,8 @@ executable lambda-test
     build-depends:
         base ^>=4.21.0.0,
         containers ^>=0.6.7,
-        parsec ^>=3.1.16.1
+        parsec ^>=3.1.16.1,
+        mtl
 
     -- Directories containing source files.
     hs-source-dirs:   app

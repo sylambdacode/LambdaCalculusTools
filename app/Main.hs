@@ -19,28 +19,53 @@ import KrivineMachine
 
 import LambdaTermTools
 import GHC.TopHandler (flushStdHandles)
+import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
+import GHC.IO.Handle (isEOF)
 
 
+get1Or0Char :: IO Char
+get1Or0Char = do
+    iseof <- isEOF
+    if iseof
+        then return 'e'
+        else do
+            c <- getChar
+            if c == '0' || c == '1'
+            then return c
+            else get1Or0Char
 
-
-transWithIO :: DeBruijnLambdaTerm -> Int -> IO DeBruijnLambdaTerm
+transWithIO :: DeBruijnLambdaTerm -> Int -> StateT [Char] IO DeBruijnLambdaTerm
 transWithIO wrapper (-1) = do
-    putStrLn "0"
-    flushStdHandles
+    liftIO $ putChar '0'
+    liftIO flushStdHandles
     return wrapper
 
 transWithIO wrapper (-2) = do
-    putStrLn "1"
-    flushStdHandles
+    liftIO $ putChar '1'
+    liftIO flushStdHandles
     return wrapper
 
-transWithIO wrapper (-3) = do
-    print "input"
-    line <- getLine
-    let value = if line == "1"
-        then DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Variable 1))
-        else DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Variable 2))
-    return $ DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Application (DeBruijnLambdaTerm.Application (DeBruijnLambdaTerm.Variable 1) value) (DeBruijnLambdaTerm.Variable (-3)))
+transWithIO wrapper n = do
+    let inputCount = abs n - 3
+    let newInputCount = inputCount + 1
+    charList <- get
+    inputChar <-
+        if length charList <= inputCount
+            then do
+                c <- liftIO get1Or0Char
+                put (c : charList)
+                return c
+            else do
+                let c = charList !! (length charList - inputCount - 1)
+                return c
+    if inputChar == '1' || inputChar == '0'
+    then do
+        value <- case inputChar of
+            '1' -> return $ DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Variable 1))
+            '0' -> return $ DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Variable 2))
+            _ -> error "Error"
+        return $ DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Application (DeBruijnLambdaTerm.Application (DeBruijnLambdaTerm.Variable 1) value) (DeBruijnLambdaTerm.Variable ((-3) - newInputCount)))
+    else return $ DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Variable 2))
 
 transWithIO _ _ = error "Error"
 
@@ -61,7 +86,6 @@ main = do
     let globalFreeVariableMap = Map.fromList [("O0___", -1), ("O1___", -2), ("input___", -3)]
     let ioWrapperDeBruijnLambdaTerm = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap [Map.empty] ioWrapper
     let deBruijnLambadTerm = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap [Map.empty] mainLambdaTerm
-    putStrLn $ show $ mainLambdaTerm
-    putStrLn $ show $ deBruijnLambadTerm
-    r <- krivineMachine (transWithIO ioWrapperDeBruijnLambdaTerm) deBruijnLambadTerm (Environment []) (Environment [])
+    let r = krivineMachine (transWithIO ioWrapperDeBruijnLambdaTerm) deBruijnLambadTerm (Environment []) (Environment [])
+    runStateT r []
     return ()
