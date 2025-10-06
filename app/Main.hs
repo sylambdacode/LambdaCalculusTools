@@ -1,17 +1,10 @@
-{-# LANGUAGE MultilineStrings #-}
-
 module Main where
 
-import LambdaTerm(LambdaTerm)
-import qualified LambdaTerm as LambdaTerm
 import DeBruijnLambdaTerm(DeBruijnLambdaTerm)
-import qualified DeBruijnLambdaTerm as DeBruijnLambdaTerm
-
-import LambdaReduction
+import qualified DeBruijnLambdaTerm
 
 import LambdaParser
 
-import Data.Map (Map)
 import qualified Data.Map as Map
 
 import KrivineMachine
@@ -22,6 +15,7 @@ import GHC.TopHandler (flushStdHandles)
 import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
 import GHC.IO.Handle (isEOF)
 
+import System.Environment(getArgs)
 
 get1Or0Char :: IO Char
 get1Or0Char = do
@@ -45,7 +39,7 @@ transWithIO wrapper (-2) = do
     liftIO flushStdHandles
     return wrapper
 
-transWithIO wrapper n = do
+transWithIO _ n = do
     let inputCount = abs n - 3
     let newInputCount = inputCount + 1
     charList <- get
@@ -72,7 +66,11 @@ transWithIO _ _ = error "Error"
 
 main :: IO ()
 main = do
-    testCode <- readFile "test.lam"
+    args <- getArgs
+    codeFile <- if null args
+        then fail "no code file"
+        else return (args !! 0)
+    testCode <- readFile codeFile
     valDefMap <- case parseCode "(test)" testCode of
         Right result -> return $ valDefListToMap result
         Left e -> fail ("parser error: " ++ show e)

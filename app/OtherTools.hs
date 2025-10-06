@@ -3,9 +3,6 @@ module OtherTools where
 import LambdaTerm
 import LambdaReduction
 
-import LambdaParser
-
-import Data.Map (Map)
 import qualified Data.Map as Map
 
 nilLambdaTerm :: LambdaTerm
