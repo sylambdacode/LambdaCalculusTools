@@ -1,0 +1,2 @@
+ioWrapper___ = λf.f (λx. x O1___ O0___);
+main = ioWrapper___ ((P___ input___));
