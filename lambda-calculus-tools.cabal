@@ -50,7 +50,7 @@ extra-doc-files:    CHANGELOG.md
 common warnings
     ghc-options: -Wall
 
-executable lambda-test
+executable lambda-calculus-tools
     -- Import common warning flags.
     import:           warnings
 
@@ -65,9 +65,9 @@ executable lambda-test
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base ^>=4.21.0.0,
-        containers ^>=0.6.7,
-        parsec ^>=3.1.16.1,
+        base,
+        containers,
+        parsec,
         mtl
 
     -- Directories containing source files.
