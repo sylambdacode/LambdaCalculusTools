@@ -1,1 +1,4 @@
-P___ = λin. bits-add in in;
+P___ = λinput. let a = do {
+    c r <- bits-add-cps true input input;
+    r
+}; in a;

@@ -36,14 +36,27 @@ map = Y λself. λf l. match-nil-cons-x-xs l
 
 fold = Y λself. λf init l. match-nil-cons-x-xs l
             init
-            λx xs. fold f (f init x) xs;
+            λx xs. self f (f init x) xs;
+
+foldr-cps = Y λself. λf init l cont. match-nil-cons-x-xs l
+            (cont init)
+            λx xs. do {
+                r <- self f init xs;
+                cont (f x r)
+            };
 
 zip2 = Y λself. λl1 l2. match-nil-cons-x-xs l1
             nil
             λx xs. cons (pair x (head l2)) (self xs (tail l2));
 
+bit-add-cps = λc m n cont. if-then-else (and m n)
+            (cont true c)
+            (if-then-else (or (and m (not n)) (and (not m) n))
+                        (cont c (not c))
+                        (cont false c));
 
 bits-iszero = λa. fold (λx y. and x (not y)) true a;
+bits-iszero-cps = λa cont. foldr-cps (λx y. and (not x) y) true a cont;
 
 bits-op = λop a b. map (λp. match-fst-snd p op) (zip2 a b);
 
@@ -51,9 +64,21 @@ bits-and = bits-op and;
 bits-xor = bits-op xor;
 bits-not = λa. map not a;
 
-bits-left-shift1 = λn. concat (tail n) (cons nil nil);
+bits-add-cps = Y λself. λc m n cont. match-nil-cons-x-xs m
+            (cont c nil)
+            (λmx mxs. do {
+                clow rbitslow <- self c mxs (tail n);
+                cbit rbit <- bit-add-cps clow mx (head n);
+                cont cbit (cons rbit rbitslow)
+            });
 
-bits-add = Y λself. λa b. if-then-else (bits-iszero b)
-            (a)
-            (self (bits-xor a b) (bits-left-shift1 (bits-and a b)));
+bits-zero = λa. map (λx. false) a;
+
+bits-one = λa. match-nil-cons-x-xs a
+            ⊥
+            (λx xs. (Y λself. λa. match-nil-cons-x-xs a
+                (cons true nil)
+                (λx xs. cons false (self xs))) xs);
+
+bits-sub-cps = λm n. bits-add-cps true m (bits-not n);
 
