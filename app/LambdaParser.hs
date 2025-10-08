@@ -6,7 +6,7 @@ import Text.ParserCombinators.Parsec
 import Data.Map (Map)
 import qualified Data.Map as Map
 
-data Expr = Var String | ExprList [Expr] | Lam [String] Expr | Do [DoItem] Expr
+data Expr = Var String | ExprList [Expr] | Lam [String] Expr | Do [DoItem] Expr | Let ValDef Expr
 data DoItem = DoItem [String] Expr
 
 instance Show Expr where
@@ -17,6 +17,7 @@ instance Show Expr where
               show' (e : es) = show e ++ " " ++ show' es
     show (Lam names expr) = "\\" ++ show names ++ "." ++ show expr
     show (Do items finalExprs) = "do" ++ " " ++ show items ++ " > " ++ show finalExprs
+    show (Let valDef expr) = "let " ++ show valDef ++ " in " ++ show expr
 
 instance Show DoItem where
     show (DoItem names expr) = show names ++ " <- " ++ show expr
@@ -51,7 +52,7 @@ parseBracket :: Parser Expr
 parseBracket = skipWhiteCharAndComment *> char '(' *> parseExprs <* skipWhiteCharAndComment <* char ')'
 
 parseExpr :: Parser Expr
-parseExpr = try parseDo <|> try parseVar <|> try parseBracket <|> try parseLam
+parseExpr = try parseDo <|> try parseLet <|> try parseVar <|> try parseBracket <|> try parseLam
 
 parseExprs :: Parser Expr
 parseExprs = simply . ExprList <$> many1 parseExpr
@@ -73,6 +74,11 @@ parseDoItem :: Parser DoItem
 parseDoItem = DoItem
     <$> many1 (try parseName)
     <*> (skipWhiteCharAndComment *> char '<' *> char '-' *> parseExprs <* skipWhiteCharAndComment <* char ';')
+
+parseLet :: Parser Expr
+parseLet = Let
+    <$> (skipWhiteCharAndComment *> char 'l' *> char 'e' *> char 't' *> parseValDef)
+    <*> (skipWhiteCharAndComment *> char 'i' *> char 'n' *> parseExprs)
 
 parseValDef :: Parser ValDef
 parseValDef = ValDef
@@ -111,6 +117,7 @@ toLambdaTerm valDefMap (Do [] finalExprs) = toLambdaTerm valDefMap finalExprs
 toLambdaTerm valDefMap (Do ((DoItem names expr) : xs) finalExprs) =
     Application (toLambdaTerm valDefMap expr)
         (lambdaFunction names (toLambdaTerm valDefMap (Do xs finalExprs)))
+toLambdaTerm valDefMap (Let (ValDef name val) expr) = Application (Abstraction name (toLambdaTerm valDefMap expr)) (toLambdaTerm valDefMap val)
 
 
 valDefListToMap :: [ValDef] -> Map String Expr
