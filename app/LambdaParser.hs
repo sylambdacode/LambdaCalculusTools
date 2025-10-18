@@ -39,7 +39,7 @@ skipWhiteChar :: Parser String
 skipWhiteChar = many $ satisfy (`elem` " \n\t")
 
 skipWhiteCharAndComment :: Parser ()
-skipWhiteCharAndComment = try (skipWhiteChar *> skipComment *> skipWhiteChar >> return ())
+skipWhiteCharAndComment = try (skipWhiteChar *> many (skipComment *> skipWhiteChar) >> return ())
     <|> try (skipWhiteChar >> return ())
 
 parseName :: Parser String
