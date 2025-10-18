@@ -4,13 +4,16 @@ bit-add-cps = λc m n cont. if-then-else (and m n)
                         (cont c (not c))
                         (cont false c));
 
-bits-iszero = λa. fold (λx y. and x (not y)) true a;
+
 bits-iszero-cps = λa cont. foldr-cps (λx y. and (not x) y) true a cont;
 
-bits-op = λop a b. map (λp. match-fst-snd p op) (zip2 a b);
+bits-op-cps = λop a b cont. do {
+    zip2-result <- zip2-cps a b;
+    map-cps (λp. match-fst-snd p op) zip2-result cont
+};
 
-bits-and = bits-op and;
-bits-xor = bits-op xor;
+bits-and-cps = bits-op-cps and;
+bits-xor-cps = bits-op-cps xor;
 bits-not-cps = λa cont. map-cps not a cont;
 
 bits-add-cps' = Y λself. λc m n cont. match-nil-cons-x-xs m

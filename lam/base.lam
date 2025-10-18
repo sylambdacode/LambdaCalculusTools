@@ -56,4 +56,13 @@ zip2 = Y λself. λl1 l2. match-nil-cons-x-xs l1
             nil
             λx xs. cons (pair x (head l2)) (self xs (tail l2));
 
+zip2-cps = Y λself. λl1 l2 cont. match-nil-cons-x-xs l1
+            (cont nil)
+            λx xs. do {
+                xl2 xsl2 <- l2;
+                r <- self xs (xsl2);
+                cont (cons (pair x xl2) r)
+            };
+
+
 id = \x. x;

@@ -74,9 +74,9 @@ main = do
     valDefMap <- case parseCode "(test)" testCode of
         Right result -> return $ valDefListToMap result
         Left e -> fail ("parser error: " ++ show e)
-    mainLambdaTerm <- case Map.lookup "main" valDefMap of
+    mainLambdaTerm <- case Map.lookup "P___" valDefMap of
         Just v -> return $ toLambdaTerm valDefMap v
-        Nothing -> fail "not founf main"
+        Nothing -> fail "not found main"
     ioWrapper <- case Map.lookup "ioWrapper___" valDefMap of
         Just v -> return $ toLambdaTerm valDefMap v
         Nothing -> fail "not found ioWrapper___"

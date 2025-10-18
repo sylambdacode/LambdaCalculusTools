@@ -1,4 +1,4 @@
-P___ = λinput. let a = do {
-    c r <- bits-add-cps true input input;
+main = λinput. do {
+    r <- bits-xor-cps input input;
     r
-}; in a;
+};
