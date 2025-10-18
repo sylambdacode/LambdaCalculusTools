@@ -1,4 +1,5 @@
-main = λinput. do {
-    r <- bits-xor-cps input input;
-    r
-};
+main = λinput. bytes-to-bits (byte-main (bits-to-bytes input));
+
+byte-main = Y \self input. match-nil-cons-x-xs input
+    nil
+    \x xs. cons x (self xs);
