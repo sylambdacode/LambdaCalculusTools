@@ -36,14 +36,14 @@ skipComment = char '{' *> char '-' *> skipComment'
             *> ((try $ char '}') <|> skipComment')
 
 skipWhiteChar :: Parser String
-skipWhiteChar = many $ satisfy (`elem` " \n\t")
+skipWhiteChar = many $ satisfy (`elem` " \n\r\t")
 
 skipWhiteCharAndComment :: Parser ()
 skipWhiteCharAndComment = try (skipWhiteChar *> many (skipComment *> skipWhiteChar) >> return ())
     <|> try (skipWhiteChar >> return ())
 
 parseName :: Parser String
-parseName = skipWhiteCharAndComment *> many1 (noneOf "λ\\.(){}=;< \n\t")
+parseName = skipWhiteCharAndComment *> many1 (noneOf "λ\\.(){}=;< \n\r\t")
 
 parseVar :: Parser Expr
 parseVar = Var <$> parseName
