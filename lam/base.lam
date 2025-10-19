@@ -34,9 +34,9 @@ map = Y λself. λf l. match-nil-cons-x-xs l
             nil
             λx xs. cons (f x) (self f xs);
 
-map-cps = Y \self. \f l cont. match-nil-cons-x-xs l
+map-cps = Y λself. λf l cont. match-nil-cons-x-xs l
             (cont nil)
-            \x xs. do {
+            λx xs. do {
                 r <- self f xs;
                 cont (cons (f x) r)
             };
@@ -65,4 +65,4 @@ zip2-cps = Y λself. λl1 l2 cont. match-nil-cons-x-xs l1
             };
 
 
-id = \x. x;
+id = λx. x;

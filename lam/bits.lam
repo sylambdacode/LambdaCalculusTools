@@ -32,7 +32,7 @@ bits-one = λa. match-nil-cons-x-xs a
                 (cons true nil)
                 (λx xs. cons false (self xs))) xs);
 
-bits-add-cps = \m n cont. do {
+bits-add-cps = λm n cont. do {
     c r <- bits-add-cps' false m n;
     cont r
 };
@@ -41,19 +41,19 @@ bits-sub-cps = λm n cont. do {
     c r <- bits-add-cps' true m n-not;
     cont r
 };
-bits-cmp-ignore-sign-cps = \m n cont. do {
+bits-cmp-ignore-sign-cps = λm n cont. do {
     r <- bits-sub-cps m n;
     rx rxs <- r;
     if-then-else rx
-        (cont \lt eq gt. lt)
+        (cont λlt eq gt. lt)
         do {
             r <- bits-iszero-cps rxs;
             if-then-else r
-                (cont \lt eq gt. eq)
-                (cont \lt eq gt. gt)
+                (cont λlt eq gt. eq)
+                (cont λlt eq gt. gt)
         }
 };
-bits-cmp-cps = \m n cont. do {
+bits-cmp-cps = λm n cont. do {
     mx mxs <- m;
     nx nxs <- n;
     let ignore-sign-result = bits-cmp-ignore-sign-cps m n cont;
@@ -61,9 +61,9 @@ bits-cmp-cps = \m n cont. do {
         {- m < 0 -}
         (if-then-else nx
             ignore-sign-result {- n < 0 -}
-            (cont \lt eq gt. lt)) {- n >= 0 -}
+            (cont λlt eq gt. lt)) {- n >= 0 -}
         {- m >= 0 -}
         (if-then-else nx
-            (cont \lt eq gt. gt) {- n < 0 -}
+            (cont λlt eq gt. gt) {- n < 0 -}
             ignore-sign-result) {- n >= 0 -}
 };
