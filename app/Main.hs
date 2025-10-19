@@ -11,11 +11,14 @@ import KrivineMachine
 
 
 import LambdaTermTools
+
 import GHC.TopHandler (flushStdHandles)
 import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
-import GHC.IO.Handle (isEOF)
-
+import GHC.IO.Handle (isEOF, hSetEncoding, hGetContents)
 import System.Environment(getArgs)
+import GHC.IO.Encoding (utf8)
+import GHC.IO.IOMode (IOMode(ReadMode))
+import GHC.IO.Handle.FD (openFile)
 
 get1Or0Char :: IO Char
 get1Or0Char = do
@@ -70,8 +73,10 @@ main = do
     codeFile <- if null args
         then fail "no code file"
         else return (args !! 0)
-    testCode <- readFile codeFile
-    valDefMap <- case parseCode "(test)" testCode of
+    handle <- openFile codeFile ReadMode
+    hSetEncoding handle utf8
+    codeContent <- hGetContents handle
+    valDefMap <- case parseCode "(code)" codeContent of
         Right result -> return $ valDefListToMap result
         Left e -> fail ("parser error: " ++ show e)
     mainLambdaTerm <- case Map.lookup "P___" valDefMap of
