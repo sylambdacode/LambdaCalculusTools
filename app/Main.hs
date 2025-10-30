@@ -19,6 +19,7 @@ import System.Environment(getArgs)
 import GHC.IO.Encoding (utf8)
 import GHC.IO.IOMode (IOMode(ReadMode))
 import GHC.IO.Handle.FD (openFile)
+import LambdaReduction (calculateNormalResult)
 
 get1Or0Char :: IO Char
 get1Or0Char = do
@@ -67,12 +68,8 @@ transWithIO _ n = do
 transWithIO _ _ = error "Error"
 
 
-main :: IO ()
-main = do
-    args <- getArgs
-    codeFile <- if null args
-        then fail "no code file"
-        else return (args !! 0)
+runMode :: String -> IO ()
+runMode codeFile = do
     handle <- openFile codeFile ReadMode
     hSetEncoding handle utf8
     codeContent <- hGetContents handle
@@ -92,3 +89,39 @@ main = do
     let r = krivineMachine (transWithIO ioWrapperDeBruijnLambdaTerm) deBruijnLambadTerm (Environment []) (Environment [])
     runStateT r []
     return ()
+
+compileMode :: String -> String -> IO ()
+compileMode functionName codeFile = do
+    handle <- openFile codeFile ReadMode
+    hSetEncoding handle utf8
+    codeContent <- hGetContents handle
+    valDefMap <- case parseCode "(code)" codeContent of
+        Right result -> return $ valDefListToMap result
+        Left e -> fail ("parser error: " ++ show e)
+    lambdaTerm <- case Map.lookup functionName valDefMap of
+        Just v -> return $ toLambdaTerm valDefMap v
+        Nothing -> fail "not found main"
+    let result = calculateNormalResult lambdaTerm
+    print result
+
+main :: IO ()
+main = do
+    args <- getArgs
+    mode <- if length args < 1
+        then fail "no mode"
+        else return (args !! 0)
+    case mode of
+        "run" -> do
+            codeFile <- if length args < 2
+                then fail "no code file"
+                else return (args !! 1)
+            runMode codeFile
+        "compile" -> do
+            functionName <- if length args < 2
+                then fail "no function name"
+                else return (args !! 1)
+            codeFile <- if length args < 3
+                then fail "no code file"
+                else return (args !! 2)
+            compileMode functionName codeFile
+        _ -> fail "unknown mode"
