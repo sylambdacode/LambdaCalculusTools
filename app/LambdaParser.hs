@@ -89,7 +89,7 @@ parseValDefs :: Parser [ValDef]
 parseValDefs = many $ try parseValDef
 
 parseCode :: SourceName -> String -> Either ParseError [ValDef]
-parseCode codeName code = parse parseValDefs codeName code
+parseCode codeName code = parse (parseValDefs <* skipWhiteCharAndComment <* eof) codeName code
 
 lambdaTermList :: [LambdaTerm] -> LambdaTerm
 lambdaTermList [] = error "wrong input(lambdaTermList)"
