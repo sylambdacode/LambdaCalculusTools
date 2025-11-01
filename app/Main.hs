@@ -14,12 +14,21 @@ import LambdaTermTools
 
 import GHC.TopHandler (flushStdHandles)
 import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
-import GHC.IO.Handle (isEOF, hSetEncoding, hGetContents)
+import GHC.IO.Handle (isEOF, hSetEncoding, hGetContents, hPutStr)
 import System.Environment(getArgs)
 import GHC.IO.Encoding (utf8)
 import GHC.IO.IOMode (IOMode(ReadMode))
-import GHC.IO.Handle.FD (openFile)
+import GHC.IO.Handle.FD (openFile, stderr)
 import LambdaReduction (calculateNormalResult)
+import Control.Exception (Exception, throw, catch)
+import GHC.IO.Handle.Text (hPutStrLn)
+
+data BaseException = BaseException String
+
+instance Exception BaseException
+
+instance Show BaseException where
+    show (BaseException message) = message
 
 get1Or0Char :: IO Char
 get1Or0Char = do
@@ -75,19 +84,19 @@ runMode codeFile = do
     codeContent <- hGetContents handle
     valDefMap <- case parseCode "(code)" codeContent of
         Right result -> return $ valDefListToMap result
-        Left e -> fail ("parser error: " ++ show e)
+        Left e -> throw $ BaseException ("parser error: " ++ show e)
     mainLambdaTerm <- case Map.lookup "P___" valDefMap of
         Just v -> return $ toLambdaTerm valDefMap v
-        Nothing -> fail "not found main"
+        Nothing -> throw $ BaseException "not found main"
     ioWrapper <- case Map.lookup "ioWrapper___" valDefMap of
         Just v -> return $ toLambdaTerm valDefMap v
-        Nothing -> fail "not found ioWrapper___"
+        Nothing -> throw $ BaseException "not found ioWrapper___"
     
     let globalFreeVariableMap = Map.fromList [("O0___", -1), ("O1___", -2), ("input___", -3)]
     let ioWrapperDeBruijnLambdaTerm = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap [Map.empty] ioWrapper
     let deBruijnLambadTerm = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap [Map.empty] mainLambdaTerm
     let r = krivineMachine (transWithIO ioWrapperDeBruijnLambdaTerm) deBruijnLambadTerm (Environment []) (Environment [])
-    runStateT r []
+    _ <- runStateT r []
     return ()
 
 compileMode :: String -> String -> IO ()
@@ -97,31 +106,34 @@ compileMode functionName codeFile = do
     codeContent <- hGetContents handle
     valDefMap <- case parseCode "(code)" codeContent of
         Right result -> return $ valDefListToMap result
-        Left e -> fail ("parser error: " ++ show e)
+        Left e -> throw $ BaseException ("parser error: " ++ show e)
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm valDefMap v
-        Nothing -> fail "not found main"
+        Nothing -> throw $ BaseException "not found main"
     let result = calculateNormalResult lambdaTerm
     print result
 
-main :: IO ()
-main = do
+mainHandler :: IO ()
+mainHandler = do
     args <- getArgs
     mode <- if length args < 1
-        then fail "no mode"
+        then throw $ BaseException "no mode"
         else return (args !! 0)
     case mode of
         "run" -> do
             codeFile <- if length args < 2
-                then fail "no code file"
+                then throw $ BaseException "no code file"
                 else return (args !! 1)
             runMode codeFile
         "compile" -> do
             functionName <- if length args < 2
-                then fail "no function name"
+                then throw $ BaseException "no function name"
                 else return (args !! 1)
             codeFile <- if length args < 3
-                then fail "no code file"
+                then throw $ BaseException "no code file"
                 else return (args !! 2)
             compileMode functionName codeFile
-        _ -> fail "unknown mode"
+        _ -> throw $ BaseException "unknown mode"
+
+main :: IO ()
+main = catch mainHandler (\e -> hPutStrLn stderr (show (e :: BaseException)))
