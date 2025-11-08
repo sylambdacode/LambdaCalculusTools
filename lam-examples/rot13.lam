@@ -1,28 +1,28 @@
 main = λinput. bytes-to-bits (byte-main (bits-to-bytes input));
 
-byte-main = Y \self input. match-nil-cons-x-xs input
+byte-main = Y λself input. match-nil-cons-x-xs input
     nil
-    \x xs. cons (tail (check-and-handle (cons false x))) (self xs);
+    λx xs. cons (tail (check-and-handle (cons false x))) (self xs);
 
-check-and-handle = \c. do {
+check-and-handle = λc. do {
     r <- bits-cmp-cps c char-a;
-    c-ge-a <- r (\cont. cont false) (\cont. cont true) (\cont. cont true);
+    c-ge-a <- r (λcont. cont false) (λcont. cont true) (λcont. cont true);
     r <- bits-cmp-cps c char-z;
-    c-le-z <- r (\cont. cont true) (\cont. cont true) (\cont. cont false);
+    c-le-z <- r (λcont. cont true) (λcont. cont true) (λcont. cont false);
     if-then-else (and c-ge-a c-le-z)
         (handle c char-a char-z)
         do {
             r <- bits-cmp-cps c char-A;
-            c-ge-A <- r (\cont. cont false) (\cont. cont true) (\cont. cont true);
+            c-ge-A <- r (λcont. cont false) (λcont. cont true) (λcont. cont true);
             r <- bits-cmp-cps c char-Z;
-            c-le-Z <- r (\cont. cont true) (\cont. cont true) (\cont. cont false);
+            c-le-Z <- r (λcont. cont true) (λcont. cont true) (λcont. cont false);
             if-then-else (and c-ge-A c-le-Z)
                 (handle c char-A char-Z)
                 c
         }
 };
 
-handle = \c l r. do {
+handle = λc l r. do {
     add-result <- bits-add-cps c bits-13;
     cmp-result <- bits-cmp-cps add-result r;
     cmp-result
