@@ -14,7 +14,7 @@ import LambdaTermTools
 
 import GHC.TopHandler (flushStdHandles)
 import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
-import GHC.IO.Handle (isEOF, hSetEncoding, hGetContents, hPutStr)
+import GHC.IO.Handle (isEOF, hSetEncoding, hGetContents)
 import System.Environment(getArgs)
 import GHC.IO.Encoding (utf8)
 import GHC.IO.IOMode (IOMode(ReadMode))
@@ -73,8 +73,6 @@ transWithIO _ n = do
             _ -> error "Error"
         return $ DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Application (DeBruijnLambdaTerm.Application (DeBruijnLambdaTerm.Variable 1) value) (DeBruijnLambdaTerm.Variable ((-3) - newInputCount)))
     else return $ DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Abstraction (DeBruijnLambdaTerm.Variable 1))
-
-transWithIO _ _ = error "Error"
 
 
 runMode :: String -> IO ()
