@@ -5,7 +5,7 @@ bit-add-cps = λc m n cont. if-then-else (and m n)
                         (cont false c));
 
 
-bits-iszero-cps = λa cont. foldr-cps (λx y. and (not x) y) true a cont;
+bits-iszero-cps = λa cont. foldr-cps (λx y cont. cont (and (not x) y)) true a cont;
 
 bits-op-cps = λop a b cont. do {
     zip2-result <- zip2-cps a b;

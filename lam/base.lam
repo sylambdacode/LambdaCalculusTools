@@ -21,14 +21,18 @@ match-nil-cons = λl n c. if-then-else (isnil l)
                         (c);
 match-nil-cons-x-xs = λl n c. match-nil-cons l n (l c);
 Y = (λu x. x (u u x)) (λu x. x (u u x));
-reserve = λl. (Y λself. λl1 l2. match-nil-cons-x-xs l1
+reverse = λl. (Y λself. λl1 l2. match-nil-cons-x-xs l1
             (l2)
             (λx xs. self xs (cons x l2)))
         l nil;
+reverse-cps = λl cont. (Y λself. λl1 l2 cont. match-nil-cons-x-xs l1
+            (cont l2)
+            (λx xs. self xs (cons x l2) cont))
+        l nil cont;
 concat = λl1 l2. (Y λself. λrl1 l2. match-nil-cons-x-xs rl1
             (l2)
             (λ x xs. self xs (cons x l2)))
-            (reserve l1) l2;
+            (reverse l1) l2;
 
 map = Y λself. λf l. match-nil-cons-x-xs l
             nil
@@ -49,7 +53,7 @@ foldr-cps = Y λself. λf init l cont. match-nil-cons-x-xs l
             (cont init)
             λx xs. do {
                 r <- self f init xs;
-                cont (f x r)
+                f x r cont
             };
 
 zip2 = Y λself. λl1 l2. match-nil-cons-x-xs l1
