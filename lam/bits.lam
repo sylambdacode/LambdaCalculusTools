@@ -67,3 +67,52 @@ bits-cmp-cps = λm n cont. do {
             (cont λlt eq gt. gt) {- n < 0 -}
             ignore-sign-result) {- n >= 0 -}
 };
+
+bits-left-shift-1-cps = λa cont. match-nil-cons-x-xs a
+            ⊥
+            (λx xs. do {
+                xs-reversed <- reverse-cps xs;
+                reverse-cps (cons false xs-reversed) cont
+            });
+
+bits-right-shift-1-cps = λa cont. reverse-cps a
+            (λa-reversed. match-nil-cons-x-xs a-reversed
+                ⊥
+                (λx xs. do {
+                    xs-reversed <- reverse-cps xs;
+                    cont (cons false xs-reversed)
+                }));
+
+bits-mul-signed-unsigned-cps = λa b cont.
+    let bits-mul-signed-unsigned-cps' = (Y λself a b r cont. match-nil-cons-x-xs b
+            (cont r)
+            (λx xs. do {
+                a-left-shift-1 <- bits-left-shift-1-cps a;
+                if-then-else x
+                    (do {
+                        r <- bits-add-cps r a;
+                        self a-left-shift-1 xs r cont
+                    })
+                    (self a-left-shift-1 xs r cont)
+                }));
+    in (do {
+        b-reversed <- reverse-cps b;
+        let zero = bits-zero a;
+        in bits-mul-signed-unsigned-cps' a b-reversed zero cont
+    });
+
+bits-mul-cps = λa b cont.
+    let zero = bits-zero a;
+    in (match-nil-cons-x-xs b
+        ⊥
+        λbx bxs. if-then-else bx
+            (match-nil-cons-x-xs a
+                ⊥
+                λax axs. if-then-else ax
+                    (do {
+                        a' <- bits-sub-cps zero a;
+                        b' <- bits-sub-cps zero b;
+                        bits-mul-signed-unsigned-cps a b cont
+                    })
+                    (bits-mul-signed-unsigned-cps b a cont))
+            (bits-mul-signed-unsigned-cps a b cont));
