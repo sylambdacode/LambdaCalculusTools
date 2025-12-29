@@ -9,12 +9,12 @@ bits-iszero-cps = λa cont. foldr-cps (λx y cont. cont (and (not x) y)) true a 
 
 bits-op-cps = λop a b cont. do {
     zip2-result <- zip2-cps a b;
-    map-cps (λp. match-fst-snd p op) zip2-result cont
+    map-cps (λp cont. cont (match-fst-snd p op)) zip2-result cont
 };
 
 bits-and-cps = bits-op-cps and;
 bits-xor-cps = bits-op-cps xor;
-bits-not-cps = λa cont. map-cps not a cont;
+bits-not-cps = λa cont. map-cps (\e cont. cont (not e)) a cont;
 
 bits-add-cps' = Y λself. λc m n cont. match-nil-cons-x-xs m
             (cont c nil)
@@ -24,13 +24,16 @@ bits-add-cps' = Y λself. λc m n cont. match-nil-cons-x-xs m
                 cont cbit (cons rbit rbitslow)
             });
 
-bits-zero = λa. map (λx. false) a;
+bits-zero-cps = λa cont. map-cps (λx cont. cont false) a cont;
 
-bits-one = λa. match-nil-cons-x-xs a
+bits-one-cps = λa cont. match-nil-cons-x-xs a
             ⊥
-            (λx xs. (Y λself. λa. match-nil-cons-x-xs a
-                (cons true nil)
-                (λx xs. cons false (self xs))) xs);
+            (λx xs. (Y λself. λa cont. match-nil-cons-x-xs a
+                (cont (cons true nil))
+                (λx xs. do {
+                    r <- self xs;
+                    cont (cons false r)
+                    })) xs cont);
 
 bits-add-cps = λm n cont. do {
     c r <- bits-add-cps' false m n;
@@ -97,13 +100,13 @@ bits-mul-signed-unsigned-cps = λa b cont.
                 }));
     in (do {
         b-reversed <- reverse-cps b;
-        let zero = bits-zero a;
-        in bits-mul-signed-unsigned-cps' a b-reversed zero cont
+        zero <- bits-zero-cps a;
+        bits-mul-signed-unsigned-cps' a b-reversed zero cont
     });
 
-bits-mul-cps = λa b cont.
-    let zero = bits-zero a;
-    in (match-nil-cons-x-xs b
+bits-mul-cps = λa b cont. do {
+    zero <- bits-zero-cps a;
+    (match-nil-cons-x-xs b
         ⊥
         λbx bxs. if-then-else bx
             (match-nil-cons-x-xs a
@@ -115,4 +118,5 @@ bits-mul-cps = λa b cont.
                         bits-mul-signed-unsigned-cps a b cont
                     })
                     (bits-mul-signed-unsigned-cps b a cont))
-            (bits-mul-signed-unsigned-cps a b cont));
+            (bits-mul-signed-unsigned-cps a b cont))
+};

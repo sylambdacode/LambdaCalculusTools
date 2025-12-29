@@ -30,7 +30,8 @@ handle = λc l r. do {
         (add-result) {- add-result = r -}
         (do { {- add-result > r -}
             sub-result <- bits-sub-cps add-result r;
-            sub-result <- bits-sub-cps sub-result (bits-one sub-result);
+            one <- bits-one-cps sub-result;
+            sub-result <- bits-sub-cps sub-result one;
             bits-add-cps sub-result l id
         })
 };

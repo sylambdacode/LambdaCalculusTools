@@ -42,7 +42,8 @@ map-cps = Y λself. λf l cont. match-nil-cons-x-xs l
             (cont nil)
             λx xs. do {
                 r <- self f xs;
-                cont (cons (f x) r)
+                fx <- f x;
+                cont (cons fx r)
             };
 
 fold = Y λself. λf init l. match-nil-cons-x-xs l
