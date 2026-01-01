@@ -1,7 +1,7 @@
 factorial-cps = Y \self n r cont. do {
     f <- bits-iszero-cps n;
     if-then-else f
-        r
+        (cont r)
         (do {
             one <- bits-one-cps n;
             n-sub-1 <- bits-sub-cps n one;
