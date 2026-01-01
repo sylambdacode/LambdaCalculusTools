@@ -120,3 +120,60 @@ bits-mul-cps = λa b cont. do {
                     (bits-mul-signed-unsigned-cps b a cont))
             (bits-mul-signed-unsigned-cps a b cont))
 };
+
+bits-div-unsigned-cps = \a b cont. do {
+    zero <- bits-zero-cps a;
+    (Y \self q r a b cont. match-nil-cons-x-xs a
+            (do {
+                q <- reverse-cps q;
+                cont q r
+            })
+            (\x xs. do {
+                r <- bits-left-shift-1-cps r;
+                x-bits <- if-then-else x (bits-one-cps r) (\cont. cont zero);
+                r <- bits-add-cps r x-bits;
+                d <- bits-sub-cps r b;
+                match-nil-cons-x-xs d
+                    ⊥
+                    \f _. if-then-else f
+                        (self (cons false q) r xs b cont)
+                        (self (cons true q) d xs b cont)
+            })) nil zero a b cont
+};
+
+bits-div-cps = λa b cont. do {
+    zero <- bits-zero-cps a;
+    (match-nil-cons-x-xs a
+        ⊥
+        λax axs. if-then-else ax
+            (match-nil-cons-x-xs b
+                ⊥
+                λbx bxs. if-then-else bx
+                    (do {
+                        a' <- bits-sub-cps zero a;
+                        b' <- bits-sub-cps zero b;
+                        bits-div-unsigned-cps a' b' \q r. do {
+                            r' <- bits-sub-cps zero r;
+                            cont q r'
+                        }
+                    })
+                    (do {
+                        a' <- bits-sub-cps zero a;
+                        bits-div-unsigned-cps a' b \q r. do {
+                            q' <- bits-sub-cps zero q;
+                            r' <- bits-sub-cps zero r;
+                            cont q' r'
+                        }
+                    }))
+            (match-nil-cons-x-xs b
+                ⊥
+                λbx bxs. if-then-else bx
+                    (do {
+                        b' <- bits-sub-cps zero b;
+                        bits-div-unsigned-cps a b' \q r. do {
+                            q' <- bits-sub-cps zero q;
+                            cont q' r
+                        }
+                    })
+                    (bits-div-unsigned-cps a b cont)))
+};
