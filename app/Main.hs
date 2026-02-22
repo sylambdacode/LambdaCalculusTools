@@ -97,8 +97,8 @@ runMode codeFile = do
     _ <- runStateT r []
     return ()
 
-compileMode :: String -> String -> IO ()
-compileMode functionName codeFile = do
+calculateMode :: String -> String -> IO ()
+calculateMode functionName codeFile = do
     handle <- openFile codeFile ReadMode
     hSetEncoding handle utf8
     codeContent <- hGetContents handle
@@ -123,14 +123,14 @@ mainHandler = do
                 then throw $ BaseException "no code file"
                 else return (args !! 1)
             runMode codeFile
-        "compile" -> do
+        "calculate" -> do
             functionName <- if length args < 2
                 then throw $ BaseException "no function name"
                 else return (args !! 1)
             codeFile <- if length args < 3
                 then throw $ BaseException "no code file"
                 else return (args !! 2)
-            compileMode functionName codeFile
+            calculateMode functionName codeFile
         _ -> throw $ BaseException "unknown mode"
 
 main :: IO ()
