@@ -14,7 +14,7 @@ krivineMachine f (Application t u) (Environment p) e =
 krivineMachine f (Abstraction t) (Environment ((u, e') : p)) (Environment e) =
     krivineMachine f t (Environment p) (Environment ((u, e') : e))
 
-krivineMachine f (Variable 1) p (Environment ((t, e'):e)) =
+krivineMachine f (Variable 1) p (Environment ((t, e'):_)) =
     krivineMachine f t p e'
 
 krivineMachine f (Variable n) p (Environment e) =
@@ -24,7 +24,5 @@ krivineMachine f (Variable n) p (Environment e) =
         lambdaTerm <- f n
         krivineMachine f lambdaTerm p (Environment e)
 
-krivineMachine f (Abstraction t) (Environment []) e =
+krivineMachine _ (Abstraction t) (Environment []) e =
     return (Abstraction t, e)
-
-krivineMachine _ _ _ _ = error "Error"
