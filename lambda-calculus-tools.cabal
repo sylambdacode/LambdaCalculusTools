@@ -58,7 +58,7 @@ executable lambda-calculus-tools
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules: LambdaTerm, LambdaReduction, DeBruijnLambdaTerm, LambdaTermTools, KrivineMachine, LambdaParser
+    other-modules: LambdaTerm, SimpleType, SimpleTypedLambdaTerm, LambdaReduction, DeBruijnLambdaTerm, LambdaTermTools, KrivineMachine, LambdaParser
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
