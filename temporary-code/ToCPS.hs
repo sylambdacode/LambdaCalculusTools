@@ -2,7 +2,7 @@
 本文件内容为开发过程中使用的临时代码
 -}
 
--- 用于将直接风格的Lambda演算表达式转化为CPS风格的Lambda演算表达式
+-- 用于将直接风格的Lambda演算表达式转化为CPS风格(Continuation-Passing Style)的Lambda演算表达式
 -- 本函数的时间复杂度与空间复杂度非常高，本代码暂时仅用于记录转换思路
 toCPS :: LambdaTerm -> LambdaTerm -> LambdaTerm
 toCPS (LambdaTerm.Variable name) k = LambdaTerm.Application k (LambdaTerm.Variable name)
