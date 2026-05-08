@@ -80,12 +80,13 @@ runMode codeFile = do
     handle <- openFile codeFile ReadMode
     hSetEncoding handle utf8
     codeContent <- hGetContents handle
-    valDefMap <- case parseCode "(code)" codeContent of
+    let finalCodeContent = "ioWrapper___ = λf.f (λx. x O1___ O0___); P___ = ioWrapper___ ((main input___)); " ++ codeContent
+    valDefMap <- case parseCode "(code)" finalCodeContent of
         Right result -> return $ valDefListToMap result
         Left e -> throw $ BaseException ("parser error: " ++ show e)
     mainLambdaTerm <- case Map.lookup "P___" valDefMap of
         Just v -> return $ toLambdaTerm valDefMap v
-        Nothing -> throw $ BaseException "not found main"
+        Nothing -> throw $ BaseException "not found P___"
     ioWrapper <- case Map.lookup "ioWrapper___" valDefMap of
         Just v -> return $ toLambdaTerm valDefMap v
         Nothing -> throw $ BaseException "not found ioWrapper___"
