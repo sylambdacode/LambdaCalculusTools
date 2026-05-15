@@ -6,19 +6,22 @@ module Main where
 
 import SimpleType
 import SimpleTypedLambdaTerm
+import qualified Data.Map as Map
 
 
 simpleTypedLambdaTerm1 :: SimpleTypedLambdaTerm
-simpleTypedLambdaTerm1 = Abstraction "x" (Variable "x" (AtomicType "A")) (FunctionType (AtomicType "A") (AtomicType "A"))
+simpleTypedLambdaTerm1 = Abstraction "x" (Variable "x") (AtomicType "B")
 
 simpleTypedLambdaTerm2 :: SimpleTypedLambdaTerm
-simpleTypedLambdaTerm2 = Variable "y" (AtomicType "A")
+simpleTypedLambdaTerm2 = Variable "y"
 
 simpleTypedLambdaTerm3 :: SimpleTypedLambdaTerm
-simpleTypedLambdaTerm3 = Application simpleTypedLambdaTerm1 simpleTypedLambdaTerm2 (AtomicType "A")
+simpleTypedLambdaTerm3 = Application simpleTypedLambdaTerm1 simpleTypedLambdaTerm2
 
 
 main :: IO ()
 main = do
     print simpleTypedLambdaTerm3
     print (checkSimpleType (Map.singleton "y" (AtomicType "A")) simpleTypedLambdaTerm3)
+
+

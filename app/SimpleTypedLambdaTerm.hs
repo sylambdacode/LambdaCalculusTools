@@ -6,40 +6,35 @@ import Data.Map (Map)
 import qualified Data.Map as Map
 
 
-
-data SimpleTypedLambdaTerm = Variable String SimpleType | Abstraction String SimpleTypedLambdaTerm SimpleType | Application SimpleTypedLambdaTerm SimpleTypedLambdaTerm SimpleType
-
-
-simpleTypeTag :: SimpleTypedLambdaTerm -> SimpleType
-simpleTypeTag (Variable _ simpleType) = simpleType
-simpleTypeTag (Abstraction _ _ simpleType) = simpleType
-simpleTypeTag (Application _ _ simpleType) = simpleType
+data SimpleTypedLambdaTerm = Variable String | Abstraction String SimpleTypedLambdaTerm SimpleType | Application SimpleTypedLambdaTerm SimpleTypedLambdaTerm
 
 
-checkSimpleType :: Map String SimpleType -> SimpleTypedLambdaTerm -> Bool
+checkSimpleType :: Map String SimpleType -> SimpleTypedLambdaTerm -> Maybe SimpleType
 
-checkSimpleType variableTypeMap (Variable name simpleType) =
+checkSimpleType variableTypeMap (Variable name) =
     case Map.lookup name variableTypeMap of
-        Just simpleType' -> simpleTypeEq simpleType simpleType'
-        Nothing -> False
+        Just simpleType -> Just simpleType
+        Nothing -> Nothing
 
-checkSimpleType variableTypeMap (Abstraction variableName lambdaTerm (FunctionType simpleType1 simpleType2)) =
-    simpleTypeEq (simpleTypeTag lambdaTerm) simpleType2 &&
-    checkSimpleType newVariableTypeMap lambdaTerm
-        where newVariableTypeMap = Map.insert variableName simpleType1 variableTypeMap
+checkSimpleType variableTypeMap (Abstraction variableName lambdaTerm simpleType) =
+    case bodySimpleType of
+        Just bodySimpleType' -> Just (FunctionType simpleType bodySimpleType')
+        Nothing -> Nothing
+    where newVariableTypeMap = Map.insert variableName simpleType variableTypeMap
+          bodySimpleType = checkSimpleType newVariableTypeMap lambdaTerm
 
-checkSimpleType variableTypeMap (Application functionLambdaTerm argumentLambdaTerm simpleType) =
-    simpleTypeEq functionLambdaTermSimpleType (FunctionType argumentLambdaTermSimpleType simpleType) &&
-    checkSimpleType variableTypeMap functionLambdaTerm &&
-    checkSimpleType variableTypeMap argumentLambdaTerm
-        where functionLambdaTermSimpleType = simpleTypeTag functionLambdaTerm
-              argumentLambdaTermSimpleType = simpleTypeTag argumentLambdaTerm
-
-checkSimpleType _ _ = False
+checkSimpleType variableTypeMap (Application functionLambdaTerm argumentLambdaTerm) = do
+    case functionLambdaTermSimpleType of
+        Just (FunctionType argumentLambdaTermSimpleType' simpleType) -> do
+            case (simpleTypeEq argumentLambdaTermSimpleType') <$> argumentLambdaTermSimpleType of
+                Just True -> Just simpleType
+                _ -> Nothing
+        _ -> Nothing
+    where functionLambdaTermSimpleType = checkSimpleType variableTypeMap functionLambdaTerm
+          argumentLambdaTermSimpleType = checkSimpleType variableTypeMap argumentLambdaTerm
 
 
 instance Show SimpleTypedLambdaTerm where
-    show (Variable name simpleType) = name ++ "^" ++ show simpleType
-    show (Abstraction variableName lambdaTerm simpleType) = "(λ" ++ variableName ++ "." ++ show lambdaTerm ++ ")" ++ "^" ++ show simpleType
-    show (Application functionLambdaTerm argumentLambdaTerm simpleType) =
-        "(" ++ show functionLambdaTerm ++ " " ++ show argumentLambdaTerm ++ ")" ++ "^" ++ show simpleType
+    show (Variable name) = name
+    show (Abstraction variableName lambdaTerm simpleType) = "(λ" ++ variableName ++ ":" ++ show simpleType ++ "." ++ show lambdaTerm ++ ")"
+    show (Application functionLambdaTerm argumentLambdaTerm) = "(" ++ show functionLambdaTerm ++ " " ++ show argumentLambdaTerm ++ ")"
