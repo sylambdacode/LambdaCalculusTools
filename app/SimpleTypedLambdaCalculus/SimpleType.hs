@@ -1,4 +1,4 @@
-module SimpleType where
+module SimpleTypedLambdaCalculus.SimpleType where
 
 data SimpleType = AtomicType String | FunctionType SimpleType SimpleType
 

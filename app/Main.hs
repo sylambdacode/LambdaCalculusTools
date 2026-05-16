@@ -1,16 +1,16 @@
 module Main where
 
-import DeBruijnLambdaTerm(DeBruijnLambdaTerm)
-import qualified DeBruijnLambdaTerm
+import UntypedLambdaCalculus.DeBruijnLambdaTerm(DeBruijnLambdaTerm)
+import qualified UntypedLambdaCalculus.DeBruijnLambdaTerm as DeBruijnLambdaTerm
 
 import LambdaParser
 
 import qualified Data.Map as Map
 
-import KrivineMachine
+import UntypedLambdaCalculus.KrivineMachine
 
 
-import LambdaTermTools
+import UntypedLambdaCalculus.LambdaTermTools
 
 import GHC.TopHandler (flushStdHandles)
 import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
@@ -19,7 +19,7 @@ import System.Environment(getArgs)
 import GHC.IO.Encoding (utf8)
 import GHC.IO.IOMode (IOMode(ReadMode))
 import GHC.IO.Handle.FD (openFile, stderr)
-import LambdaReduction (calculateNormalResult)
+import UntypedLambdaCalculus.LambdaReduction (calculateNormalResult)
 import Control.Exception (Exception, throw, catch)
 import GHC.IO.Handle.Text (hPutStrLn)
 

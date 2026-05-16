@@ -1,9 +1,9 @@
-module LambdaTermTools where
+module UntypedLambdaCalculus.LambdaTermTools where
 
-import LambdaTerm(LambdaTerm)
-import qualified LambdaTerm as LambdaTerm
-import DeBruijnLambdaTerm(DeBruijnLambdaTerm)
-import qualified DeBruijnLambdaTerm as DeBruijnLambdaTerm
+import UntypedLambdaCalculus.LambdaTerm(LambdaTerm)
+import qualified UntypedLambdaCalculus.LambdaTerm as LambdaTerm
+import UntypedLambdaCalculus.DeBruijnLambdaTerm(DeBruijnLambdaTerm)
+import qualified UntypedLambdaCalculus.DeBruijnLambdaTerm as DeBruijnLambdaTerm
 
 import Data.Map (Map)
 import qualified Data.Map as Map

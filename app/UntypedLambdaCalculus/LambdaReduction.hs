@@ -1,6 +1,6 @@
-module LambdaReduction where
+module UntypedLambdaCalculus.LambdaReduction where
 
-import LambdaTerm
+import UntypedLambdaCalculus.LambdaTerm
 
 import qualified Data.Map as Map
 

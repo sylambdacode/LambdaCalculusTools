@@ -1,6 +1,6 @@
 module LambdaParser where
 
-import LambdaTerm
+import UntypedLambdaCalculus.LambdaTerm
 
 import Text.ParserCombinators.Parsec
 import Data.Map (Map)

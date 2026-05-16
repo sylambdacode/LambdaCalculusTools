@@ -1,6 +1,6 @@
-module SimpleTypedLambdaTerm where
+module SimpleTypedLambdaCalculus.SimpleTypedLambdaTerm where
 
-import SimpleType
+import SimpleTypedLambdaCalculus.SimpleType
 
 import Data.Map (Map)
 import qualified Data.Map as Map

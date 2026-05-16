@@ -1,6 +1,6 @@
-module LambdaCubeReduction where
+module LambdaCube.LambdaCubeReduction where
 
-import LambdaCubeTerm
+import LambdaCube.LambdaCubeTerm
 
 import qualified Data.Map as Map
 

@@ -1,6 +1,6 @@
-module KrivineMachine where
+module UntypedLambdaCalculus.KrivineMachine where
 
-import DeBruijnLambdaTerm
+import UntypedLambdaCalculus.DeBruijnLambdaTerm
 
 newtype Environment = Environment [(DeBruijnLambdaTerm, Environment)] deriving Show
 

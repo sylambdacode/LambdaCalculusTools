@@ -4,8 +4,8 @@
 
 module Main where
 
-import SimpleType
-import SimpleTypedLambdaTerm
+import SimpleTypedLambdaCalculus.SimpleType
+import SimpleTypedLambdaCalculus.SimpleTypedLambdaTerm
 import qualified Data.Map as Map
 
 

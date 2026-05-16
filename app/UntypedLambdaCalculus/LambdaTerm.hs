@@ -1,4 +1,4 @@
-module LambdaTerm where
+module UntypedLambdaCalculus.LambdaTerm where
 
 import Data.Set (Set)
 import qualified Data.Set as Set

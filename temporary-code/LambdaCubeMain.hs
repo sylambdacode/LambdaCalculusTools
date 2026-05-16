@@ -5,9 +5,9 @@
 
 module Main where
 
-import LambdaCubeTerm
-import LambdaCubeReduction
-import LambdaCubeType
+import LambdaCube.LambdaCubeTerm
+import LambdaCube.LambdaCubeReduction
+import LambdaCube.LambdaCubeType
 
 import Data.Map(Map)
 import qualified Data.Map as Map

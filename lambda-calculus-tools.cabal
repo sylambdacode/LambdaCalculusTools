@@ -59,16 +59,16 @@ executable lambda-calculus-tools
 
     -- Modules included in this executable, other than Main.
     other-modules:
-        LambdaTerm,
-        DeBruijnLambdaTerm,
-        SimpleType,
-        SimpleTypedLambdaTerm,
-        LambdaCubeTerm,
-        LambdaReduction,
-        LambdaCubeReduction,
-        LambdaCubeType,
-        LambdaTermTools,
-        KrivineMachine,
+        UntypedLambdaCalculus.LambdaTerm,
+        UntypedLambdaCalculus.DeBruijnLambdaTerm,
+        SimpleTypedLambdaCalculus.SimpleType,
+        SimpleTypedLambdaCalculus.SimpleTypedLambdaTerm,
+        LambdaCube.LambdaCubeTerm,
+        UntypedLambdaCalculus.LambdaReduction,
+        LambdaCube.LambdaCubeReduction,
+        LambdaCube.LambdaCubeType,
+        UntypedLambdaCalculus.LambdaTermTools,
+        UntypedLambdaCalculus.KrivineMachine,
         LambdaParser
 
     -- LANGUAGE extensions used by modules in this package.

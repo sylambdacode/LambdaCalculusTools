@@ -1,4 +1,4 @@
-module LambdaCubeTerm where
+module LambdaCube.LambdaCubeTerm where
 
 import Data.Set (Set)
 import qualified Data.Set as Set

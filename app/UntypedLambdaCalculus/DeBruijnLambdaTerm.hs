@@ -1,4 +1,4 @@
-module DeBruijnLambdaTerm where
+module UntypedLambdaCalculus.DeBruijnLambdaTerm where
 
 data DeBruijnLambdaTerm = Variable Int | Abstraction DeBruijnLambdaTerm | Application DeBruijnLambdaTerm DeBruijnLambdaTerm
 
