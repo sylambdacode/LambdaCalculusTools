@@ -4,6 +4,7 @@
 - Lambda Calculus Beta-规约器
 - 传统Lambda项转De Bruijn Lambda项工具
 - 支持对简单类型Lambda演算表达式进行类型检查
+- 支持对Lambda Cube表达式进行类型检查，支持自定义规则
 - Krivine Machine
 - 支持扩展语法的Lambda项文本解析器
 
