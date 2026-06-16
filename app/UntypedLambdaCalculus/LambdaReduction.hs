@@ -11,7 +11,7 @@ normalOrderBetaReduce (Abstraction variableName lambdaTerm) = Abstraction variab
 normalOrderBetaReduce (Application (Abstraction variableName bodyLambdaTerm) argumentLambdaTerm) =
     substitute bodyLambdaTerm variableName argumentLambdaTerm
 normalOrderBetaReduce (Application functionLambdaTerm argumentLambdaTerm) =
-    if alphaEq Map.empty functionLambdaTerm functionLambdaTermResult
+    if isNormalForm functionLambdaTerm
         then Application functionLambdaTerm (normalOrderBetaReduce argumentLambdaTerm)
         else Application functionLambdaTermResult argumentLambdaTerm
     where functionLambdaTermResult = normalOrderBetaReduce functionLambdaTerm
