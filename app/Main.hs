@@ -7,7 +7,7 @@ import LambdaParser
 
 import qualified Data.Map as Map
 
-import UntypedLambdaCalculus.KrivineMachine
+import UntypedLambdaCalculus.LazyKrivineMachine
 
 
 import UntypedLambdaCalculus.LambdaTermTools
@@ -94,7 +94,7 @@ runMode codeFile = do
     let globalFreeVariableMap = Map.fromList [("O0___", -1), ("O1___", -2), ("input___", -3)]
     let ioWrapperDeBruijnLambdaTerm = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap [Map.empty] ioWrapper
     let deBruijnLambadTerm = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap [Map.empty] mainLambdaTerm
-    let r = krivineMachine (transWithIO ioWrapperDeBruijnLambdaTerm) deBruijnLambadTerm (Environment []) (Environment [])
+    let r = krivineMachine (transWithIO ioWrapperDeBruijnLambdaTerm) deBruijnLambadTerm [] [] Map.empty
     _ <- runStateT r []
     return ()
 

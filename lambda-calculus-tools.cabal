@@ -69,6 +69,7 @@ executable lambda-calculus-tools
         LambdaCube.LambdaCubeType,
         UntypedLambdaCalculus.LambdaTermTools,
         UntypedLambdaCalculus.KrivineMachine,
+        UntypedLambdaCalculus.LazyKrivineMachine,
         LambdaParser
 
     -- LANGUAGE extensions used by modules in this package.
