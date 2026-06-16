@@ -8,18 +8,13 @@ import qualified Data.Map as Map
 
 data LambdaTerm = Variable String | Abstraction String LambdaTerm | Application LambdaTerm LambdaTerm
 
-fvSet :: Set String -> LambdaTerm -> Set String
-fvSet bvSet (Variable name) =
-    if name `Set.member` bvSet
-        then Set.empty
-        else Set.singleton name
+fvSet :: LambdaTerm -> Set String
+fvSet (Variable name) = Set.singleton name
 
-fvSet bvSet (Abstraction variableName lambdaTerm) = fvSet newBvSet lambdaTerm
-    where newBvSet = Set.insert variableName bvSet
+fvSet (Abstraction variableName lambdaTerm) = Set.delete variableName (fvSet lambdaTerm)
 
-fvSet bvSet (Application functionLambdaTerm argumentLambdaTerm) =
-    Set.union (fvSet' functionLambdaTerm) (fvSet' argumentLambdaTerm)
-        where fvSet' = fvSet bvSet
+fvSet (Application functionLambdaTerm argumentLambdaTerm) =
+    Set.union (fvSet functionLambdaTerm) (fvSet argumentLambdaTerm)
 
 
 substitute :: LambdaTerm -> String -> LambdaTerm -> LambdaTerm
@@ -39,8 +34,8 @@ substitute (Abstraction variableName bodyLambdaTerm) substitutedVariableName lam
     -- | variableName `Set.member` lambdaTermFvSet = Abstraction newVariableName (substitute newBodyLambdaTerm substitutedVariableName lambdaTerm)
     | otherwise = Abstraction newVariableName (substitute newBodyLambdaTerm substitutedVariableName lambdaTerm)
         where newBodyLambdaTerm = substitute bodyLambdaTerm variableName (Variable newVariableName)
-              bodyLambdaTermFvSet = fvSet Set.empty bodyLambdaTerm
-              lambdaTermFvSet = fvSet Set.empty lambdaTerm
+              bodyLambdaTermFvSet = fvSet bodyLambdaTerm
+              lambdaTermFvSet = fvSet lambdaTerm
               newVariableName = getNewVariableName variableName
               getNewVariableName name = if not (name `Set.member` lambdaTermFvSet) then name else getNewVariableName (name ++ "_")
 
