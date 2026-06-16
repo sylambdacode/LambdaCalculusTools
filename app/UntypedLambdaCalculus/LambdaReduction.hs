@@ -2,8 +2,6 @@ module UntypedLambdaCalculus.LambdaReduction where
 
 import UntypedLambdaCalculus.LambdaTerm
 
-import qualified Data.Map as Map
-
 
 normalOrderBetaReduce :: LambdaTerm -> LambdaTerm
 normalOrderBetaReduce (Variable name) = Variable name
