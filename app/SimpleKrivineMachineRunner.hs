@@ -11,19 +11,15 @@ import UntypedLambdaCalculus.LazyKrivineMachine
 
 import UntypedLambdaCalculus.LambdaTermTools
 
+import BaseException
+
 import GHC.TopHandler (flushStdHandles)
 import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
 import GHC.IO.Handle (isEOF, hSetEncoding, hGetContents)
 import GHC.IO.Encoding (utf8)
 import GHC.IO.IOMode (IOMode(ReadMode))
 import GHC.IO.Handle.FD (openFile)
-import Control.Exception (Exception, throw)
-data BaseException = BaseException String
-
-instance Exception BaseException
-
-instance Show BaseException where
-    show (BaseException message) = message
+import Control.Exception (throw)
 
 get1Or0Char :: IO Char
 get1Or0Char = do

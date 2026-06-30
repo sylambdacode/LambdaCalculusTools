@@ -30,8 +30,8 @@ data ValDef = ValDef String Expr
 instance Show ValDef where
     show (ValDef name expr) = show name ++ " = " ++ show expr
 
-parseSpecailChar :: Parser Char
-parseSpecailChar = do
+parseEscapeChar :: Parser Char
+parseEscapeChar = do
     c <- satisfy (`elem` "\\\"ntvrx")
     case c of
         '\\' -> return '\\'
@@ -54,7 +54,7 @@ parseStringValue = (skipWhiteCharAndComment *> char '\"' *> parseStringValue')
               c <- satisfy (\c -> c == '\\' || c == '\"')
               case c of
                   '\\' -> do
-                      c' <- parseSpecailChar
+                      c' <- parseEscapeChar
                       r <- parseStringValue'
                       return (value ++ [c'] ++ r)
                   '\"' -> return value

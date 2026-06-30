@@ -3,20 +3,15 @@ module SimpleLang (subcommand) where
 import UntypedLambdaCalculus.LambdaTerm
 import LambdaParser
 
+import BaseException
+
 import qualified Data.Map as Map
 import GHC.IO.Handle (hSetEncoding, hGetContents)
 import GHC.IO.Encoding (utf8)
 import GHC.IO.IOMode (IOMode(ReadMode))
 import GHC.IO.Handle.FD (openFile)
 import UntypedLambdaCalculus.LambdaReduction (calculateWeakNormalHeadResult)
-import Control.Exception (Exception, throw)
-data BaseException = BaseException String
-
-instance Exception BaseException
-
-instance Show BaseException where
-    show (BaseException message) = message
-
+import Control.Exception (throw)
 
 matchFunction :: LambdaTerm -> IO String
 matchFunction (Application (Application (Variable "concat")  arg1) arg2) = do
@@ -81,13 +76,10 @@ matchFunction (Application (Application (Variable "gt")  arg1) arg2) = do
 
 matchFunction (Application (Application (Application (Variable "if")  arg1) arg2) arg3) = do
     arg1val <- evalExpr arg1
-    --putStrLn ("if if if : " ++ arg1val)
     if read arg1val
         then do
-            --putStrLn ("if then: " ++ show arg2)
             evalExpr arg2
         else do
-            --putStrLn ("if else: " ++ show arg3)
             evalExpr arg3
 
 
@@ -97,10 +89,6 @@ matchFunction _ = error "match function error"
 evalExpr :: LambdaTerm -> IO String
 evalExpr lambdaTerm = do
     let l = calculateWeakNormalHeadResult lambdaTerm
-    --print v
-    --putStrLn ("-----" ++ (show lambdaTerm))
-    --putStrLn ("=====" ++ (show l))
-    --threadDelay 1000000
     v <- matchFunction l
     return v
 
@@ -115,8 +103,6 @@ subcommand functionName codeFile = do
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm valDefMap v
         Nothing -> throw $ BaseException "not found main"
-
-    --print lambdaTerm
     result <- evalExpr lambdaTerm
     print result
     return ()
