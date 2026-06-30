@@ -70,7 +70,10 @@ executable lambda-calculus-tools
         UntypedLambdaCalculus.LambdaTermTools,
         UntypedLambdaCalculus.KrivineMachine,
         UntypedLambdaCalculus.LazyKrivineMachine,
-        LambdaParser
+        LambdaParser,
+        SimpleCalculator,
+        SimpleLang,
+        SimpleKrivineMachineRunner
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

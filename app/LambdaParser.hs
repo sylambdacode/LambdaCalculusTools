@@ -5,6 +5,9 @@ import UntypedLambdaCalculus.LambdaTerm
 import Text.ParserCombinators.Parsec
 import Data.Map (Map)
 import qualified Data.Map as Map
+import Numeric (readHex)
+import Data.Char (chr)
+
 
 data Expr = Var String | ExprList [Expr] | Lam [String] Expr | Do [DoItem] Expr | Let ValDef Expr
 data DoItem = DoItem [String] Expr
@@ -27,6 +30,36 @@ data ValDef = ValDef String Expr
 instance Show ValDef where
     show (ValDef name expr) = show name ++ " = " ++ show expr
 
+parseSpecailChar :: Parser Char
+parseSpecailChar = do
+    c <- satisfy (`elem` "\\\"ntvrx")
+    case c of
+        '\\' -> return '\\'
+        '\"' -> return '\"'
+        'n' -> return '\n'
+        't' -> return '\t'
+        'v' -> return '\v'
+        'r' -> return '\r'
+        'x' -> do
+            hexValue <- count 2 (satisfy (`elem` "0123456789abcdefABCDEF"))
+            case readHex hexValue of
+                (result, _):[] -> return (chr result)
+                _ -> error "parse string error"
+        _ -> return '?'
+
+parseStringValue :: Parser String
+parseStringValue = (skipWhiteCharAndComment *> char '\"' *> parseStringValue')
+    where parseStringValue' = do
+              value <- many $ satisfy (\c -> not (c == '\\' || c == '\"'))
+              c <- satisfy (\c -> c == '\\' || c == '\"')
+              case c of
+                  '\\' -> do
+                      c' <- parseSpecailChar
+                      r <- parseStringValue'
+                      return (value ++ [c'] ++ r)
+                  '\"' -> return value
+                  _ -> error "parse string error"
+
 
 skipComment :: Parser Char
 skipComment = char '{' *> char '-' *> skipComment'
@@ -43,10 +76,10 @@ skipWhiteCharAndComment = try (skipWhiteChar *> many (skipComment *> skipWhiteCh
     <|> try (skipWhiteChar >> return ())
 
 parseName :: Parser String
-parseName = skipWhiteCharAndComment *> many1 (noneOf "λ\\.(){}=;< \n\r\t")
+parseName = skipWhiteCharAndComment *> many1 (noneOf "λ\\.(){}=;< \"\n\r\t")
 
 parseVar :: Parser Expr
-parseVar = Var <$> parseName
+parseVar = Var <$> (try parseName <|> try parseStringValue)
 
 parseBracket :: Parser Expr
 parseBracket = skipWhiteCharAndComment *> char '(' *> parseExprs <* skipWhiteCharAndComment <* char ')'
