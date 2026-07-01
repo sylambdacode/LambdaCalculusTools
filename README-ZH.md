@@ -30,10 +30,10 @@ main = let a = b; in c a;
 main = (λa. c a) b;
 -}
 ```
-### Do-Expression
+### CPS-Expression
 
 ```
-main = do {
+main = cps {
     a b <- c;
     d < e f;
     g
