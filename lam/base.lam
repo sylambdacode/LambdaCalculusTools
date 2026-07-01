@@ -40,7 +40,7 @@ map = Y λself. λf l. match-nil-cons-x-xs l
 
 map-cps = Y λself. λf l cont. match-nil-cons-x-xs l
             (cont nil)
-            λx xs. do {
+            λx xs. cps {
                 r <- self f xs;
                 fx <- f x;
                 cont (cons fx r)
@@ -52,7 +52,7 @@ fold = Y λself. λf init l. match-nil-cons-x-xs l
 
 foldr-cps = Y λself. λf init l cont. match-nil-cons-x-xs l
             (cont init)
-            λx xs. do {
+            λx xs. cps {
                 r <- self f init xs;
                 f x r cont
             };
@@ -63,7 +63,7 @@ zip2 = Y λself. λl1 l2. match-nil-cons-x-xs l1
 
 zip2-cps = Y λself. λl1 l2 cont. match-nil-cons-x-xs l1
             (cont nil)
-            λx xs. do {
+            λx xs. cps {
                 xl2 xsl2 <- l2;
                 r <- self xs (xsl2);
                 cont (cons (pair x xl2) r)

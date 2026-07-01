@@ -1,8 +1,8 @@
-factorial-cps = Y \self n r cont. do {
+factorial-cps = Y λself n r cont. cps {
     f <- bits-iszero-cps n;
     if-then-else f
         (cont r)
-        (do {
+        (cps {
             one <- bits-one-cps n;
             n-sub-1 <- bits-sub-cps n one;
             r <- bits-mul-cps r n;

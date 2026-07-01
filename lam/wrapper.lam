@@ -1,11 +1,11 @@
 bytes-to-bits = Y λself l. match-nil-cons l
             nil
-            do {
+            cps {
                 x xs <- l;
                 append-8 x (self xs)
             };
 
-append-8 = λl r. do {
+append-8 = λl r. cps {
     c1 xs1 <- l;
     c2 xs2 <- xs1;
     c3 xs3 <- xs2;
@@ -19,12 +19,12 @@ append-8 = λl r. do {
 
 bits-to-bytes = Y λself l. match-nil-cons l
             nil
-            do {
+            cps {
                 x xs <- take-8 l;
                 cons x (self xs)
             };
 
-take-8 = λl cont. do {
+take-8 = λl cont. cps {
     c1 xs1 <- l;
     c2 xs2 <- xs1;
     c3 xs3 <- xs2;
