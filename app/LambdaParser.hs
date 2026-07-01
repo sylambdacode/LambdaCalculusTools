@@ -9,8 +9,8 @@ import Numeric (readHex)
 import Data.Char (chr)
 
 
-data Expr = Var String | ExprList [Expr] | Lam [String] Expr | Do [DoItem] Expr | Let ValDef Expr
-data DoItem = DoItem [String] Expr
+data Expr = Var String | ExprList [Expr] | Lam [String] Expr | Cps [CpsItem] Expr | Let ValDef Expr
+data CpsItem = CpsItem [String] Expr
 
 instance Show Expr where
     show (Var name) = name
@@ -19,11 +19,11 @@ instance Show Expr where
               show' [e] = show e
               show' (e : es) = show e ++ " " ++ show' es
     show (Lam names expr) = "\\" ++ show names ++ "." ++ show expr
-    show (Do items finalExprs) = "do" ++ " " ++ show items ++ " > " ++ show finalExprs
+    show (Cps items finalExprs) = "do" ++ " " ++ show items ++ " > " ++ show finalExprs
     show (Let valDef expr) = "let " ++ show valDef ++ " in " ++ show expr
 
-instance Show DoItem where
-    show (DoItem names expr) = show names ++ " <- " ++ show expr
+instance Show CpsItem where
+    show (CpsItem names expr) = show names ++ " <- " ++ show expr
 
 data ValDef = ValDef String Expr
 
@@ -76,7 +76,7 @@ skipWhiteCharAndComment = try (skipWhiteChar *> many (skipComment *> skipWhiteCh
     <|> try (skipWhiteChar >> return ())
 
 parseName :: Parser String
-parseName = skipWhiteCharAndComment *> many1 (noneOf "λ\\.(){}=;< \"\n\r\t")
+parseName = skipWhiteCharAndComment *> many1 (noneOf "λ^.(){}=;< \"\n\r\t")
 
 parseVar :: Parser Expr
 parseVar = Var <$> (try parseName <|> try parseStringValue)
@@ -85,7 +85,7 @@ parseBracket :: Parser Expr
 parseBracket = skipWhiteCharAndComment *> char '(' *> parseExprs <* skipWhiteCharAndComment <* char ')'
 
 parseExpr :: Parser Expr
-parseExpr = try parseDo <|> try parseLet <|> try parseVar <|> try parseBracket <|> try parseLam
+parseExpr = try parseCps <|> try parseLet <|> try parseVar <|> try parseBracket <|> try parseLam
 
 parseExprs :: Parser Expr
 parseExprs = simply . ExprList <$> many1 parseExpr
@@ -95,16 +95,16 @@ parseExprs = simply . ExprList <$> many1 parseExpr
 
 parseLam :: Parser Expr
 parseLam = Lam
-    <$> (skipWhiteCharAndComment *> oneOf "\\λ" *> many1 (try parseName))
+    <$> (skipWhiteCharAndComment *> oneOf "λ^" *> many1 (try parseName))
     <*> (skipWhiteCharAndComment *> char '.' *> parseExprs)
 
-parseDo :: Parser Expr
-parseDo = Do <$> (skipWhiteCharAndComment *> char 'd' *> char 'o' *> skipWhiteCharAndComment *> char '{'
-    *> many1 (try parseDoItem)) <*> (parseExprs <* skipWhiteCharAndComment
+parseCps :: Parser Expr
+parseCps = Cps <$> (skipWhiteCharAndComment *> char 'c' *> char 'p' *> char 's' *> skipWhiteCharAndComment *> char '{'
+    *> many1 (try parseCpsItem)) <*> (parseExprs <* skipWhiteCharAndComment
         <* char '}')
 
-parseDoItem :: Parser DoItem
-parseDoItem = DoItem
+parseCpsItem :: Parser CpsItem
+parseCpsItem = CpsItem
     <$> many1 (try parseName)
     <*> (skipWhiteCharAndComment *> char '<' *> char '-' *> parseExprs <* skipWhiteCharAndComment <* char ';')
 
@@ -146,10 +146,10 @@ toLambdaTerm valDefMap (Var name) =
         Nothing -> Variable name
 toLambdaTerm valDefMap (ExprList exprs) = lambdaTermList (map (toLambdaTerm valDefMap) exprs)
 toLambdaTerm valDefMap (Lam names expr) = lambdaFunction names (toLambdaTerm valDefMap expr)
-toLambdaTerm valDefMap (Do [] finalExprs) = toLambdaTerm valDefMap finalExprs
-toLambdaTerm valDefMap (Do ((DoItem names expr) : xs) finalExprs) =
+toLambdaTerm valDefMap (Cps [] finalExprs) = toLambdaTerm valDefMap finalExprs
+toLambdaTerm valDefMap (Cps ((CpsItem names expr) : xs) finalExprs) =
     Application (toLambdaTerm valDefMap expr)
-        (lambdaFunction names (toLambdaTerm valDefMap (Do xs finalExprs)))
+        (lambdaFunction names (toLambdaTerm valDefMap (Cps xs finalExprs)))
 toLambdaTerm valDefMap (Let (ValDef name val) expr) = Application (Abstraction name (toLambdaTerm valDefMap expr)) (toLambdaTerm valDefMap val)
 
 
