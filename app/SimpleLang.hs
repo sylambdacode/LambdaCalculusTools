@@ -13,70 +13,124 @@ import GHC.IO.Handle.FD (openFile)
 import UntypedLambdaCalculus.LambdaReduction (calculateWeakNormalHeadResult)
 import Control.Exception (throw)
 
+toSimpleLangString :: String -> String
+toSimpleLangString str = ('\'' : str)
+
+fromSimpleLangString :: String -> String
+fromSimpleLangString ('\'' : str) = str
+fromSimpleLangString _ = error "not string"
+
+toSimpleLangInt :: Integer -> String
+toSimpleLangInt i = show i
+
+fromSimpleLangInt :: String -> Integer
+fromSimpleLangInt i = read i
+
+toSimpleLangBool :: Bool -> String
+toSimpleLangBool True = "true"
+toSimpleLangBool False = "false"
+
+fromSimpleLangBool :: String -> Bool
+fromSimpleLangBool "true" = True
+fromSimpleLangBool "false" = False
+fromSimpleLangBool _ = error "not bool"
+
 matchFunction :: LambdaTerm -> IO String
+
 matchFunction (Application (Application (Variable "concat")  arg1) arg2) = do
-    ('\'' : arg1val) <- evalExpr arg1
-    ('\'' : arg2val) <- evalExpr arg2
-    return ('\'' : (arg1val ++ arg2val))
-matchFunction (Application (Application (Variable "print")  arg1) arg2) = do
-    ('\'' : arg1val) <- evalExpr arg1
-    putStrLn arg1val
-    evalExpr (Application arg2 (Variable "'"))
-matchFunction (Application (Variable "tostring")  arg1) = do
     arg1val <- evalExpr arg1
-    return ('\'' : arg1val)
+    arg2val <- evalExpr arg2
+    return (toSimpleLangString (fromSimpleLangString arg1val ++ fromSimpleLangString arg2val))
+
+matchFunction (Application (Application (Variable "print")  arg1) arg2) = do
+    arg1val <- evalExpr arg1
+    putStr (fromSimpleLangString arg1val)
+    evalExpr (Application arg2 (Variable "'"))
+
+matchFunction (Application (Variable "readline")  arg1) = do
+    line <- getLine
+    evalExpr (Application arg1 (Variable (toSimpleLangString line)))
+
+matchFunction (Application (Application (Variable "strict")  arg1) arg2) = do
+    arg1val <- evalExpr arg1
+    evalExpr (Application arg2 (Variable arg1val))
+
+matchFunction (Application (Variable "inttostring")  arg1) = do
+    arg1val <- evalExpr arg1
+    return (toSimpleLangString arg1val)
+matchFunction (Application (Variable "stringtoint")  arg1) = do
+    arg1val <- evalExpr arg1
+    return (fromSimpleLangString arg1val)
 
 matchFunction (Application (Application (Variable "add")  arg1) arg2) = do
-    arg1strval <- evalExpr arg1
-    arg2strval <- evalExpr arg2
-    let arg1val = (read arg1strval) :: Integer
-    let arg2val = (read arg2strval) :: Integer
-    return $ show (arg1val + arg2val)
+    arg1SimpleLangValue <- evalExpr arg1
+    arg2SimpleLangValue <- evalExpr arg2
+    let arg1val = fromSimpleLangInt arg1SimpleLangValue
+    let arg2val = fromSimpleLangInt arg2SimpleLangValue
+    return $ toSimpleLangInt (arg1val + arg2val)
+
 matchFunction (Application (Application (Variable "sub")  arg1) arg2) = do
-    arg1strval <- evalExpr arg1
-    arg2strval <- evalExpr arg2
-    let arg1val = (read arg1strval) :: Integer
-    let arg2val = (read arg2strval) :: Integer
-    return $ show (arg1val - arg2val)
+    arg1SimpleLangValue <- evalExpr arg1
+    arg2SimpleLangValue <- evalExpr arg2
+    let arg1val = fromSimpleLangInt arg1SimpleLangValue
+    let arg2val = fromSimpleLangInt arg2SimpleLangValue
+    return $ toSimpleLangInt (arg1val - arg2val)
 
 matchFunction (Application (Application (Variable "mul")  arg1) arg2) = do
-    arg1strval <- evalExpr arg1
-    arg2strval <- evalExpr arg2
-    let arg1val = (read arg1strval) :: Integer
-    let arg2val = (read arg2strval) :: Integer
-    return $ show (arg1val * arg2val)
+    arg1SimpleLangValue <- evalExpr arg1
+    arg2SimpleLangValue <- evalExpr arg2
+    let arg1val = fromSimpleLangInt arg1SimpleLangValue
+    let arg2val = fromSimpleLangInt arg2SimpleLangValue
+    return $ toSimpleLangInt (arg1val * arg2val)
 
 matchFunction (Application (Application (Variable "div")  arg1) arg2) = do
-    arg1strval <- evalExpr arg1
-    arg2strval <- evalExpr arg2
-    let arg1val = (read arg1strval) :: Integer
-    let arg2val = (read arg2strval) :: Integer
-    return $ show (arg1val `div` arg2val)
+    arg1SimpleLangValue <- evalExpr arg1
+    arg2SimpleLangValue <- evalExpr arg2
+    let arg1val = fromSimpleLangInt arg1SimpleLangValue
+    let arg2val = fromSimpleLangInt arg2SimpleLangValue
+    return $ toSimpleLangInt (arg1val `div` arg2val)
+
 matchFunction (Application (Application (Variable "eq")  arg1) arg2) = do
     arg1val <- evalExpr arg1
     arg2val <- evalExpr arg2
-    return $ show (arg1val == arg2val)
+    return $ toSimpleLangBool (arg1val == arg2val)
+
 matchFunction (Application (Application (Variable "neq")  arg1) arg2) = do
     arg1val <- evalExpr arg1
     arg2val <- evalExpr arg2
-    return $ show (arg1val /= arg2val)
-matchFunction (Application (Application (Variable "lt")  arg1) arg2) = do
-    arg1strval <- evalExpr arg1
-    arg2strval <- evalExpr arg2
-    let arg1val = (read arg1strval) :: Integer
-    let arg2val = (read arg2strval) :: Integer
-    return $ show (arg1val < arg2val)
-matchFunction (Application (Application (Variable "gt")  arg1) arg2) = do
-    arg1strval <- evalExpr arg1
-    arg2strval <- evalExpr arg2
-    let arg1val = (read arg1strval) :: Integer
-    let arg2val = (read arg2strval) :: Integer
-    return $ show (arg1val > arg2val)
+    return $ toSimpleLangBool (arg1val /= arg2val)
 
+matchFunction (Application (Application (Variable "lt")  arg1) arg2) = do
+    arg1SimpleLangValue <- evalExpr arg1
+    arg2SimpleLangValue <- evalExpr arg2
+    let arg1val = fromSimpleLangInt arg1SimpleLangValue
+    let arg2val = fromSimpleLangInt arg2SimpleLangValue
+    return $ toSimpleLangBool (arg1val < arg2val)
+
+matchFunction (Application (Application (Variable "gt")  arg1) arg2) = do
+    arg1SimpleLangValue <- evalExpr arg1
+    arg2SimpleLangValue <- evalExpr arg2
+    let arg1val = fromSimpleLangInt arg1SimpleLangValue
+    let arg2val = fromSimpleLangInt arg2SimpleLangValue
+    return $ toSimpleLangBool (arg1val > arg2val)
+
+matchFunction (Application (Application (Variable "lteq")  arg1) arg2) = do
+    arg1SimpleLangValue <- evalExpr arg1
+    arg2SimpleLangValue <- evalExpr arg2
+    let arg1val = fromSimpleLangInt arg1SimpleLangValue
+    let arg2val = fromSimpleLangInt arg2SimpleLangValue
+    return $ toSimpleLangBool (arg1val <= arg2val)
+
+matchFunction (Application (Application (Variable "gteq")  arg1) arg2) = do
+    arg1SimpleLangValue <- evalExpr arg1
+    arg2SimpleLangValue <- evalExpr arg2
+    let arg1val = fromSimpleLangInt arg1SimpleLangValue
+    let arg2val = fromSimpleLangInt arg2SimpleLangValue
+    return $ toSimpleLangBool (arg1val >= arg2val)
 
 matchFunction (Application (Application (Application (Variable "if")  arg1) arg2) arg3) = do
     arg1val <- evalExpr arg1
-    if read arg1val
+    if fromSimpleLangBool arg1val
         then do
             evalExpr arg2
         else do
@@ -103,8 +157,7 @@ subcommand functionName codeFile = do
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm valDefMap v
         Nothing -> throw $ BaseException "not found main"
-    result <- evalExpr lambdaTerm
-    print result
+    _ <- evalExpr lambdaTerm
     return ()
 
 
