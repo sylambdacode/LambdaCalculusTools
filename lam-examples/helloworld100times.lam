@@ -2,13 +2,13 @@
 
 main = cps {
     _ <- loop 1;
-    _ <- print (concat "'fact(100) = " (tostring (fact 100)));
     _
 };
 
 
 loop = Y ^self. ^a. ^cont. cps {
-    _ <- print (concat "'helloworld" (tostring a));
+    _ <- print (concat "'helloworld" (inttostring a));
+    _ <- print "'\n";
     if (eq a 100)
         (cont a)
         cps {
@@ -16,11 +16,5 @@ loop = Y ^self. ^a. ^cont. cps {
             cont a
         }
 };
-
-
-fact = Y ^self. ^a.
-    if (eq a 0)
-        1
-        (mul a (self (sub a 1)));
 
 Y = (λu x. x (u u x)) (λu x. x (u u x));
