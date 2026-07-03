@@ -58,9 +58,26 @@ matchFunction (Application (Application (Variable "strict")  arg1) arg2) = do
 matchFunction (Application (Variable "inttostring")  arg1) = do
     arg1val <- evalExpr arg1
     return (toSimpleLangString arg1val)
+
 matchFunction (Application (Variable "stringtoint")  arg1) = do
     arg1val <- evalExpr arg1
     return (fromSimpleLangString arg1val)
+
+matchFunction (Application (Variable "stringlength")  arg1) = do
+    arg1val <- evalExpr arg1
+    let v = length (fromSimpleLangString arg1val)
+    return (toSimpleLangInt (toInteger v))
+
+matchFunction (Application (Application (Application (Variable "substring")  arg1) arg2) arg3) = do
+    arg1SimpleLangValue <- evalExpr arg1
+    arg2SimpleLangValue <- evalExpr arg2
+    arg3SimpleLangValue <- evalExpr arg3
+    let arg1val = fromSimpleLangString arg1SimpleLangValue
+    let arg2val = fromSimpleLangInt arg2SimpleLangValue
+    let arg3val = fromSimpleLangInt arg3SimpleLangValue
+    let arg2valInt = fromInteger (arg2val)
+    let arg3valInt = fromInteger (arg3val)
+    return $ toSimpleLangString (take arg3valInt (drop arg2valInt arg1val))
 
 matchFunction (Application (Application (Variable "add")  arg1) arg2) = do
     arg1SimpleLangValue <- evalExpr arg1
@@ -157,7 +174,8 @@ subcommand functionName codeFile = do
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm valDefMap v
         Nothing -> throw $ BaseException "not found main"
-    _ <- evalExpr lambdaTerm
+    print lambdaTerm
+    _ <- evalExpr (readLambdaTerm (show lambdaTerm))
     return ()
 
 
