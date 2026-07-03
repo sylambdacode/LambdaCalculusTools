@@ -58,9 +58,94 @@ alphaEq variableNameMap (Application functionLambdaTerm1 argumentLambdaTerm1) (A
 
 alphaEq _ _ _ = False
 
-
 instance Show LambdaTerm where
-    show (Variable name) = name
-    show (Abstraction variableName lambdaTerm) = "(λ" ++ variableName ++ "." ++ show lambdaTerm ++ ")"
-    show (Application functionLambdaTerm argumentLambdaTerm) =
-        "(" ++ show functionLambdaTerm ++ " " ++ show argumentLambdaTerm ++ ")"
+    show lambdaTerm = showLambdaTerm lambdaTerm
+
+showVariableName :: String -> String
+showVariableName [] = []
+showVariableName (c : xs) =
+    if c == 'λ' || c == ' ' || c == '(' || c == ')' || c == '.' || c == '\\'
+        then '\\' : c : (showVariableName xs)
+        else c : (showVariableName xs)
+
+showLambdaTerm :: LambdaTerm -> String
+showLambdaTerm (Variable name) = showVariableName name
+showLambdaTerm (Abstraction variableName lambdaTerm) =
+    "(λ" ++ showVariableName variableName ++ "." ++ show lambdaTerm ++ ")"
+showLambdaTerm (Application functionLambdaTerm argumentLambdaTerm) =
+    "(" ++ show functionLambdaTerm ++ " " ++ show argumentLambdaTerm ++ ")"
+
+
+readLambdaTerm :: String -> LambdaTerm
+readLambdaTerm lambdaTermString =
+    case parseLambdaTerm lambdaTermString of
+        (Just lambdaTerm, _) -> lambdaTerm
+        (Nothing, _) -> error "parse LambdaTerm String error"
+
+parseVariableName :: String -> Bool -> (Maybe String, String)
+parseVariableName [] _ = (Nothing, [])
+parseVariableName (c : xs) True =
+    if c == 'λ' || c == ' ' || c == '(' || c == ')' || c == '.' || c == '\\'
+        then case parseVariableName xs False of
+                 (Just result, reminder) -> (Just (c : result), reminder)
+                 (Nothing, reminder) -> (Just [c], reminder)
+        else (Nothing, (c : xs))
+parseVariableName (c : xs) False =
+    if c == 'λ' || c == ' ' || c == '(' || c == ')' || c == '.'
+        then (Nothing, (c : xs))
+        else if c == '\\'
+                 then case parseVariableName xs True of
+                          (Just result, reminder) -> (Just result, reminder)
+                          (Nothing, _) -> (Nothing, (c : xs))
+                 else case parseVariableName xs False of
+                          (Just result, reminder) -> (Just (c : result), reminder)
+                          (Nothing, reminder) -> (Just [c], reminder)
+
+parseVariable :: String -> (Maybe LambdaTerm, String)
+parseVariable lambdaTermString =
+    case parseVariableName lambdaTermString False of
+        (Just result, reminder) -> (Just (Variable result), reminder)
+        (Nothing, reminder) -> (Nothing, reminder)
+
+parseAbstraction :: String -> (Maybe LambdaTerm, String)
+parseAbstraction lambdaTermString =
+    case lambdaTermString of
+        ('(' : 'λ' : reminder1) ->
+            case parseVariableName reminder1 False of
+                (Just name, '.' : reminder2) ->
+                    case parseLambdaTerm reminder2 of
+                        (Just bodyLambdaTerm, ')' : reminder3) -> (Just (Abstraction name bodyLambdaTerm), reminder3)
+                        (Just _, reminder3) -> (Nothing, reminder3)
+                        (Nothing, reminder3) -> (Nothing, reminder3)
+                (Just _, reminder2) -> (Nothing, reminder2)
+                (Nothing, reminder2) -> (Nothing, reminder2)
+        _ -> (Nothing, lambdaTermString)
+
+parseApplication :: String -> (Maybe LambdaTerm, String)
+parseApplication lambdaTermString =
+    case lambdaTermString of
+        ('(' : reminder1) ->
+            case parseLambdaTerm reminder1 of
+                (Just functionLambdaTerm, ' ' : reminder2) ->
+                    case parseLambdaTerm reminder2 of
+                        (Just argumentLambdaTerm, ')' : reminder3) -> (Just (Application functionLambdaTerm argumentLambdaTerm), reminder3)
+                        (Just _, reminder3) -> (Nothing, reminder3)
+                        (Nothing, reminder3) -> (Nothing, reminder3)
+                (Just _, reminder2) -> (Nothing, reminder2)
+                (Nothing, reminder2) -> (Nothing, reminder2)
+        _ -> (Nothing, lambdaTermString)
+
+
+parseLambdaTerm :: String -> (Maybe LambdaTerm, String)
+parseLambdaTerm lambdaTermString =
+    case parseVariable lambdaTermString of
+        (Just result, reminder) -> (Just result, reminder)
+        (Nothing, _) ->
+            case parseAbstraction lambdaTermString of
+                (Just result, reminder) -> (Just result, reminder)
+                (Nothing, _) ->
+                    case parseApplication lambdaTermString of
+                        (Just result, reminder) -> (Just result, reminder)
+                        (Nothing, reminder) -> (Nothing, reminder)
+
+
