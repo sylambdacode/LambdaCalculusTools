@@ -6,6 +6,8 @@ import LambdaParser
 
 import qualified Data.Map as Map
 
+import qualified Data.Set as Set
+
 import UntypedLambdaCalculus.LazyKrivineMachine
 
 
@@ -76,10 +78,10 @@ subcommand codeFile = do
         Right result -> return $ valDefListToMap result
         Left e -> throw $ BaseException ("parser error: " ++ show e)
     mainLambdaTerm <- case Map.lookup "P___" valDefMap of
-        Just v -> return $ toLambdaTerm valDefMap v
+        Just v -> return $ toLambdaTerm Set.empty valDefMap v
         Nothing -> throw $ BaseException "not found P___"
     ioWrapper <- case Map.lookup "ioWrapper___" valDefMap of
-        Just v -> return $ toLambdaTerm valDefMap v
+        Just v -> return $ toLambdaTerm Set.empty valDefMap v
         Nothing -> throw $ BaseException "not found ioWrapper___"
     
     let globalFreeVariableMap = Map.fromList [("O0___", -1), ("O1___", -2), ("input___", -3)]

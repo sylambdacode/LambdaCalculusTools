@@ -7,6 +7,8 @@ import Data.Map (Map)
 import qualified Data.Map as Map
 import Numeric (readHex)
 import Data.Char (chr)
+import Data.Set (Set)
+import qualified Data.Set as Set
 
 
 data Expr = Var String | ExprList [Expr] | Lam [String] Expr | Cps [CpsItem] Expr | Let ValDef Expr
@@ -139,18 +141,22 @@ lambdaFunction (variableName : otherVariableNameList) bodyLambdaTerm =
 
 
 
-toLambdaTerm :: Map String Expr -> Expr -> LambdaTerm
-toLambdaTerm valDefMap (Var name) =
-    case Map.lookup name valDefMap of
-        Just expr -> toLambdaTerm valDefMap expr
-        Nothing -> Variable name
-toLambdaTerm valDefMap (ExprList exprs) = lambdaTermList (map (toLambdaTerm valDefMap) exprs)
-toLambdaTerm valDefMap (Lam names expr) = lambdaFunction names (toLambdaTerm valDefMap expr)
-toLambdaTerm valDefMap (Cps [] finalExprs) = toLambdaTerm valDefMap finalExprs
-toLambdaTerm valDefMap (Cps ((CpsItem names expr) : xs) finalExprs) =
-    Application (toLambdaTerm valDefMap expr)
-        (lambdaFunction names (toLambdaTerm valDefMap (Cps xs finalExprs)))
-toLambdaTerm valDefMap (Let (ValDef name val) expr) = Application (Abstraction name (toLambdaTerm valDefMap expr)) (toLambdaTerm valDefMap val)
+toLambdaTerm :: Set String -> Map String Expr -> Expr -> LambdaTerm
+toLambdaTerm varSet valDefMap (Var name) =
+    if not (name `Set.member` varSet)
+        then
+            case Map.lookup name valDefMap of
+            Just expr -> toLambdaTerm varSet valDefMap expr
+            Nothing -> Variable name
+        else Variable name
+toLambdaTerm varSet valDefMap (ExprList exprs) = lambdaTermList (map (toLambdaTerm varSet valDefMap) exprs)
+toLambdaTerm varSet valDefMap (Lam names expr) = lambdaFunction names (toLambdaTerm (Set.union varSet (Set.fromList names)) valDefMap expr)
+toLambdaTerm varSet valDefMap (Cps [] finalExprs) = toLambdaTerm varSet valDefMap finalExprs
+toLambdaTerm varSet valDefMap (Cps ((CpsItem names expr) : xs) finalExprs) =
+    Application (toLambdaTerm varSet valDefMap expr)
+        (lambdaFunction names (toLambdaTerm varSet valDefMap (Cps xs finalExprs)))
+toLambdaTerm varSet valDefMap (Let (ValDef name val) expr) =
+    Application (Abstraction name (toLambdaTerm (Set.insert name varSet) valDefMap expr)) (toLambdaTerm varSet valDefMap val)
 
 
 valDefListToMap :: [ValDef] -> Map String Expr
