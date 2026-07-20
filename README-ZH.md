@@ -5,9 +5,30 @@
 - 传统Lambda项转De Bruijn Lambda项工具
 - 支持对简单类型Lambda演算表达式进行类型检查
 - 支持对Lambda Cube表达式进行类型检查，支持自定义规则
-- Krivine Machine
+- Krivine Machine与Lazy Krivine Machine
 - 支持扩展语法的Lambda项文本解析器
 - 简单的编程语言
+
+## 基本使用方法
+
+规约Lambda表达式：
+
+```
+./run.sh calculate f lam-examples/reducation.lam
+```
+
+运行Lazy Krivine Machine：
+
+```
+cat lam/*.lam > merged_code.lam
+./run.sh run merged_code.lam
+```
+
+运行通过扩展Lambda演算而实现的的简单编程语言：
+
+```
+./run.sh simplelang main lam-examples/helloworld100times.lam
+```
 
 ## Lambda项文本解析器
 
@@ -20,6 +41,22 @@ N_2 = \f x. f (f x);
 pow2 = \x. x N_2
 main = pow2 (λf x. f (f (f x)));
 ```
+
+这种命名主要用于简化Lambda表达式的编写，增强表达式可读性，是一种字面量意义上的命名，会在表达式解析完成后重新组合为单个表达式。
+
+例如：
+
+```
+A = a;
+B = b;
+C = A B;
+```
+
+表达式解析完成后，`C`相当于`a b`。
+
+因此，通常不通过引用Lambda项名称的方式实现递归运算，例如：`f = f x;`。
+
+在Lambda演算中可以通过不动点组合子来实现递归。
 
 ### Let-Expression
 
@@ -35,7 +72,7 @@ main = (λa. c a) b;
 ```
 main = cps {
     a b <- c;
-    d < e f;
+    d <- e f;
     g
 };
 {-
