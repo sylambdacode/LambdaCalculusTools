@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cabal run lambda-calculus-tools -- $1 $2 $3
+cabal run lambda-calculus-tools-main -- $1 $2 $3
