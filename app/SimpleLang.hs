@@ -175,7 +175,6 @@ subcommand functionName codeFile = do
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm Set.empty valDefMap v
         Nothing -> throw $ BaseException "not found main"
-    print lambdaTerm
     _ <- evalExpr (readLambdaTerm (show lambdaTerm))
     return ()
 
