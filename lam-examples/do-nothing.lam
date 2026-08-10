@@ -1,0 +1,5 @@
+main = λinput. bytes-to-bits (byte-main (bits-to-bytes input));
+
+byte-main = Y λself input. match-nil-cons-x-xs input
+    nil
+    λx xs. cons x (self xs);

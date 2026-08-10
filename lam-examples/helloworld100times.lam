@@ -1,0 +1,20 @@
+{- use simplelang subcommand -}
+
+main = cps {
+    _ <- loop 1;
+    _
+};
+
+
+loop = Y ^self. ^a. ^cont. cps {
+    _ <- print (concat "'helloworld" (inttostring a));
+    _ <- print "'\n";
+    if (eq a 100)
+        (cont a)
+        cps {
+            _ <- self (add a 1);
+            cont a
+        }
+};
+
+Y = (λu x. x (u u x)) (λu x. x (u u x));

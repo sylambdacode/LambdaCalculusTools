@@ -1,0 +1,69 @@
+cabal-version:      3.0
+
+name:               lambda-calculus-tools
+
+version:            0.1.0.0
+
+license:            MIT
+
+author:             sylambdacode
+
+maintainer:         sy16367@163.com
+
+build-type:         Simple
+
+extra-doc-files:    CHANGELOG.md
+
+
+common warnings
+    ghc-options: -Wall
+
+
+library
+    import:           warnings
+
+    exposed-modules:
+        UntypedLambdaCalculus.LambdaTerm,
+        UntypedLambdaCalculus.DeBruijnLambdaTerm,
+        SimpleTypedLambdaCalculus.SimpleType,
+        SimpleTypedLambdaCalculus.SimpleTypedLambdaTerm,
+        LambdaCube.LambdaCubeTerm,
+        UntypedLambdaCalculus.LambdaReduction,
+        LambdaCube.LambdaCubeReduction,
+        LambdaCube.LambdaCubeType,
+        UntypedLambdaCalculus.LambdaTermTools,
+        UntypedLambdaCalculus.KrivineMachine,
+        UntypedLambdaCalculus.LazyKrivineMachine,
+        LambdaParser
+
+    build-depends:
+        base,
+        containers,
+        parsec,
+        mtl
+
+    hs-source-dirs:   src
+
+    default-language: Haskell2010
+
+
+executable lambda-calculus-tools-main
+    import:           warnings
+
+    main-is:          Main.hs
+
+    other-modules:
+        SimpleCalculator,
+        SimpleLang,
+        SimpleKrivineMachineRunner,
+        BaseException
+
+    build-depends:
+        base,
+        containers,
+        mtl,
+        lambda-calculus-tools
+
+    hs-source-dirs:   app
+
+    default-language: Haskell2010

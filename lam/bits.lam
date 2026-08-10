@@ -1,0 +1,179 @@
+bit-add-cps = λc m n cont. if-then-else (and m n)
+            (cont true c)
+            (if-then-else (or (and m (not n)) (and (not m) n))
+                        (cont c (not c))
+                        (cont false c));
+
+
+bits-iszero-cps = λa cont. foldr-cps (λx y cont. cont (and (not x) y)) true a cont;
+
+bits-op-cps = λop a b cont. cps {
+    zip2-result <- zip2-cps a b;
+    map-cps (λp cont. cont (match-fst-snd p op)) zip2-result cont
+};
+
+bits-and-cps = bits-op-cps and;
+bits-xor-cps = bits-op-cps xor;
+bits-not-cps = λa cont. map-cps (λe cont. cont (not e)) a cont;
+
+bits-add-cps' = Y λself. λc m n cont. match-nil-cons-x-xs m
+            (cont c nil)
+            (λmx mxs. cps {
+                clow rbitslow <- self c mxs (tail n);
+                cbit rbit <- bit-add-cps clow mx (head n);
+                cont cbit (cons rbit rbitslow)
+            });
+
+bits-zero-cps = λa cont. map-cps (λx cont. cont false) a cont;
+
+bits-one-cps = λa cont. match-nil-cons-x-xs a
+            ⊥
+            (λx xs. (Y λself. λa cont. match-nil-cons-x-xs a
+                (cont (cons true nil))
+                (λx xs. cps {
+                    r <- self xs;
+                    cont (cons false r)
+                    })) xs cont);
+
+bits-add-cps = λm n cont. cps {
+    c r <- bits-add-cps' false m n;
+    cont r
+};
+bits-sub-cps = λm n cont. cps {
+    n-not <- bits-not-cps n;
+    c r <- bits-add-cps' true m n-not;
+    cont r
+};
+bits-cmp-ignore-sign-cps = λm n cont. cps {
+    r <- bits-sub-cps m n;
+    rx rxs <- r;
+    if-then-else rx
+        (cont λlt eq gt. lt)
+        cps {
+            r <- bits-iszero-cps rxs;
+            if-then-else r
+                (cont λlt eq gt. eq)
+                (cont λlt eq gt. gt)
+        }
+};
+bits-cmp-cps = λm n cont. cps {
+    mx mxs <- m;
+    nx nxs <- n;
+    let ignore-sign-result = bits-cmp-ignore-sign-cps m n cont;
+    in if-then-else mx
+        {- m < 0 -}
+        (if-then-else nx
+            ignore-sign-result {- n < 0 -}
+            (cont λlt eq gt. lt)) {- n >= 0 -}
+        {- m >= 0 -}
+        (if-then-else nx
+            (cont λlt eq gt. gt) {- n < 0 -}
+            ignore-sign-result) {- n >= 0 -}
+};
+
+bits-left-shift-1-cps = λa cont. match-nil-cons-x-xs a
+            ⊥
+            (λx xs. cps {
+                xs-reversed <- reverse-cps xs;
+                reverse-cps (cons false xs-reversed) cont
+            });
+
+bits-right-shift-1-cps = λa cont. reverse-cps a
+            (λa-reversed. match-nil-cons-x-xs a-reversed
+                ⊥
+                (λx xs. cps {
+                    xs-reversed <- reverse-cps xs;
+                    cont (cons false xs-reversed)
+                }));
+
+bits-mul-signed-unsigned-cps = λa b cont.
+    let bits-mul-signed-unsigned-cps' = (Y λself a b r cont. match-nil-cons-x-xs b
+            (cont r)
+            (λx xs. cps {
+                a-left-shift-1 <- bits-left-shift-1-cps a;
+                if-then-else x
+                    (cps {
+                        r <- bits-add-cps r a;
+                        self a-left-shift-1 xs r cont
+                    })
+                    (self a-left-shift-1 xs r cont)
+                }));
+    in (cps {
+        b-reversed <- reverse-cps b;
+        zero <- bits-zero-cps a;
+        bits-mul-signed-unsigned-cps' a b-reversed zero cont
+    });
+
+bits-mul-cps = λa b cont. cps {
+    zero <- bits-zero-cps a;
+    (match-nil-cons-x-xs b
+        ⊥
+        λbx bxs. if-then-else bx
+            (match-nil-cons-x-xs a
+                ⊥
+                λax axs. if-then-else ax
+                    (cps {
+                        a' <- bits-sub-cps zero a;
+                        b' <- bits-sub-cps zero b;
+                        bits-mul-signed-unsigned-cps a b cont
+                    })
+                    (bits-mul-signed-unsigned-cps b a cont))
+            (bits-mul-signed-unsigned-cps a b cont))
+};
+
+bits-div-unsigned-cps = λa b cont. cps {
+    zero <- bits-zero-cps a;
+    (Y λself q r a b cont. match-nil-cons-x-xs a
+            (cps {
+                q <- reverse-cps q;
+                cont q r
+            })
+            (λx xs. cps {
+                r <- bits-left-shift-1-cps r;
+                x-bits <- if-then-else x (bits-one-cps r) (λcont. cont zero);
+                r <- bits-add-cps r x-bits;
+                d <- bits-sub-cps r b;
+                match-nil-cons-x-xs d
+                    ⊥
+                    λf _. if-then-else f
+                        (self (cons false q) r xs b cont)
+                        (self (cons true q) d xs b cont)
+            })) nil zero a b cont
+};
+
+bits-div-cps = λa b cont. cps {
+    zero <- bits-zero-cps a;
+    (match-nil-cons-x-xs a
+        ⊥
+        λax axs. if-then-else ax
+            (match-nil-cons-x-xs b
+                ⊥
+                λbx bxs. if-then-else bx
+                    (cps {
+                        a' <- bits-sub-cps zero a;
+                        b' <- bits-sub-cps zero b;
+                        bits-div-unsigned-cps a' b' λq r. cps {
+                            r' <- bits-sub-cps zero r;
+                            cont q r'
+                        }
+                    })
+                    (cps {
+                        a' <- bits-sub-cps zero a;
+                        bits-div-unsigned-cps a' b λq r. cps {
+                            q' <- bits-sub-cps zero q;
+                            r' <- bits-sub-cps zero r;
+                            cont q' r'
+                        }
+                    }))
+            (match-nil-cons-x-xs b
+                ⊥
+                λbx bxs. if-then-else bx
+                    (cps {
+                        b' <- bits-sub-cps zero b;
+                        bits-div-unsigned-cps a b' λq r. cps {
+                            q' <- bits-sub-cps zero q;
+                            cont q' r
+                        }
+                    })
+                    (bits-div-unsigned-cps a b cont)))
+};

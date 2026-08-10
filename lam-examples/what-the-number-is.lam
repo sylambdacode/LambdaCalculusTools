@@ -1,0 +1,33 @@
+{- use simplelang subcommand -}
+
+main = cps {
+    _ <- print "'Please input a integer:\n";
+    _ <- loop 100;
+    _
+};
+
+
+loop = Y ^self. ^answer. ^cont. cps {
+    stringvalue <- readline;
+    let number = stringtoint stringvalue; in
+    if (eq number answer)
+        cps {
+            _ <- print "'That's right! The number is ";
+            _ <- print (inttostring answer);
+            _ <- print "'!\n";
+            cont answer
+        }
+        (if (lt number answer)
+            cps {
+                _ <- print "'Inputed number is less than the answer, please try again.\n";
+                _ <- self answer;
+                cont _
+            }
+            cps {
+                _ <- print "'Inputed number is greater than the answer, please try again.\n";
+                _ <- self answer;
+                cont _
+            })
+};
+
+Y = (λu x. x (u u x)) (λu x. x (u u x));
