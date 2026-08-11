@@ -13,14 +13,24 @@ lambdaTermToDeBruijnLambdaTerm :: Map String Int -> [Map String Int] -> LambdaTe
 lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap variableMapStack (LambdaTerm.Variable name) =
     case Map.lookup name globalFreeVariableMap of
         Nothing ->
-            case Map.lookup name (head variableMapStack) of
+            case Map.lookup name variableMapStackTop of
                 Just variableLevel -> DeBruijnLambdaTerm.Variable (length variableMapStack - variableLevel)
                 Nothing -> DeBruijnLambdaTerm.Variable 0
         Just index -> DeBruijnLambdaTerm.Variable index
+    where variableMapStackTop = case variableMapStack of
+              [] -> error "wrong variable map stack"
+              x : _ -> x
+
 lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap variableMapStack (LambdaTerm.Abstraction name lambdaTerm) =
-    let variableMap = Map.insert name (length variableMapStack) (head variableMapStack)
-    in DeBruijnLambdaTerm.Abstraction (lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap (variableMap : variableMapStack) lambdaTerm)
+    let variableMap = Map.insert name (length variableMapStack) variableMapStackTop
+    in DeBruijnLambdaTerm.Abstraction (lambdaTermToDeBruijnLambdaTerm' (variableMap : variableMapStack) lambdaTerm)
+    where lambdaTermToDeBruijnLambdaTerm' = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap
+          variableMapStackTop = case variableMapStack of
+              [] -> error "wrong variable map stack"
+              x : _ -> x
+
 lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap variableMapStack (LambdaTerm.Application functionLambdaTerm argumentLambdaTerm) =
-    DeBruijnLambdaTerm.Application (lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap variableMapStack functionLambdaTerm) (lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap variableMapStack argumentLambdaTerm)
+    DeBruijnLambdaTerm.Application (lambdaTermToDeBruijnLambdaTerm' functionLambdaTerm) (lambdaTermToDeBruijnLambdaTerm' argumentLambdaTerm)
+    where lambdaTermToDeBruijnLambdaTerm' = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap variableMapStack
 
 
