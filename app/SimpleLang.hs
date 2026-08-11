@@ -13,6 +13,7 @@ import GHC.IO.IOMode (IOMode(ReadMode))
 import GHC.IO.Handle.FD (openFile)
 import UntypedLambdaCalculus.LambdaReduction (calculateWeakNormalHeadResult)
 import Control.Exception (throw)
+import Data.Char (chr, ord)
 
 toSimpleLangString :: String -> String
 toSimpleLangString str = ('\'' : str)
@@ -63,6 +64,19 @@ matchFunction (Application (Variable "inttostring")  arg1) = do
 matchFunction (Application (Variable "stringtoint")  arg1) = do
     arg1val <- evalExpr arg1
     return (fromSimpleLangString arg1val)
+
+matchFunction (Application (Variable "inttochar")  arg1) = do
+    arg1val <- evalExpr arg1
+    let arg1charval = chr (fromInteger (fromSimpleLangInt arg1val))
+    return (toSimpleLangString [arg1charval])
+
+matchFunction (Application (Variable "chartoint")  arg1) = do
+    arg1val <- evalExpr arg1
+    let arg1stringval = fromSimpleLangString arg1val
+    case arg1stringval of
+        c : "" -> return (toSimpleLangInt (toInteger (ord c)))
+        "" -> error "char (string) length must be 1"
+        _ -> error "char (string) length must be 1"
 
 matchFunction (Application (Variable "stringlength")  arg1) = do
     arg1val <- evalExpr arg1
