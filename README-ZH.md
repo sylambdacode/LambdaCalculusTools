@@ -14,14 +14,13 @@
 规约Lambda表达式：
 
 ```
-./run.sh calculate f lam-examples/reducation.lam
+lambda-calculus-tools-main calculate -f f lam-examples/reducation.lam
 ```
 
 运行Lazy Krivine Machine：
 
 ```
-cat lam/*.lam > merged_code.lam
-./run.sh run merged_code.lam
+lambda-calculus-tools-main runKrivineMachine lam/*.lam
 ```
 
 运行通过扩展Lambda演算而实现的的简单编程语言：
@@ -29,13 +28,13 @@ cat lam/*.lam > merged_code.lam
 打印100次Hello World
 
 ```
-./run.sh simplelang main lam-examples/helloworld100times.lam
+lambda-calculus-tools-main simplelang lam-examples/helloworld100times.lam
 ```
 
 猜数字小游戏
 
 ```
-./run.sh simplelang main lam-examples/what-the-number-is.lam
+lambda-calculus-tools-main simplelang lam-examples/what-the-number-is.lam
 ```
 
 ## Lambda项文本解析器
