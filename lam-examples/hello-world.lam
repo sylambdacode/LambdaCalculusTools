@@ -1,3 +1,9 @@
+{-
+use runKrvineMachine subcommand
+require lam-lib
+-}
+
+
 main = λinput. bytes-to-bits (byte-main (bits-to-bytes input));
 
 byte-main = λinput. cons char-h (cons char-e (cons char-l (cons char-l (cons char-o (cons char-comma (cons char-space (cons char-w (cons char-o (cons char-r (cons char-l (cons char-d (cons char-EM (cons char-LF nil)))))))))))));

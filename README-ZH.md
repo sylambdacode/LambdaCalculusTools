@@ -20,7 +20,7 @@ lambda-calculus-tools-main calculate -f f lam-examples/reducation.lam
 运行Lazy Krivine Machine：
 
 ```
-lambda-calculus-tools-main runKrivineMachine lam/*.lam
+lambda-calculus-tools-main runKrivineMachine lam-examples/hello-world.lam lam-lib/*.lam
 ```
 
 运行通过扩展Lambda演算而实现的的简单编程语言：

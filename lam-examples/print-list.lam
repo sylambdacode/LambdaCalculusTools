@@ -1,0 +1,54 @@
+{- use simplelang subcommand -}
+
+
+{-
+map(int -> string) as string list
+-}
+
+main = cps {
+    list <- strict map-create;
+    list <- strict (append-100-element list);
+    _ <- strict (printList' list);
+    _ <- strict (printList list 0);
+    _
+};
+
+printList = Y ^self. ^list. ^index.
+    if (int-lt index (map-size list))
+        cps {
+            value <- strict (map-get list index);
+            _ <- print "'array[";
+            _ <- print (int-to-string index);
+            _ <- print "'] = ";
+            _ <- print value;
+            _ <- print "'\n";
+
+            next-index <- strict (int-add index 1);
+            v <- strict (self list next-index);
+            v
+        }
+        (0);
+
+printList' = ^list.
+    let printFunc = (^v index value. cps {
+        _ <- print "'array[";
+        _ <- print (int-to-string index);
+        _ <- print "'] = ";
+        _ <- print value;
+        _ <- print "'\n";
+        v
+    }); in map-fold list printFunc 0;
+
+append-100-element = Y ^self. ^list. cps {
+    index <- strict (map-size list);
+    value <- strict (string-concat "'string value" (int-to-string (int-add index 1)));
+    list <- strict (map-put list index value);
+    if (eq (map-size list) 100)
+        (list)
+        cps {
+            v <- strict (self list);
+            v
+        }
+};
+
+Y = (λu x. x (u u x)) (λu x. x (u u x));

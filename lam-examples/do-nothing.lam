@@ -1,3 +1,8 @@
+{-
+use runKrvineMachine subcommand
+require lam-lib
+-}
+
 main = λinput. bytes-to-bits (byte-main (bits-to-bytes input));
 
 byte-main = Y λself input. match-nil-cons-x-xs input
