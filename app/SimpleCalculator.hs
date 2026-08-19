@@ -2,7 +2,7 @@ module SimpleCalculator (subcommand) where
 
 import LambdaParser.UntypedLambdaParser
 import UntypedLambdaCalculus.LambdaReduction (calculateNormalResult)
-import BaseException
+import CommandException
 import CommandArg
 
 import qualified Data.Map as Map
@@ -22,7 +22,7 @@ parseCodeFiles (codeFile : codeFiles) = do
     codeContent <- hGetContents handle
     valDefList <- case runParseCode codeFile codeContent of
         Right result -> return result
-        Left e -> throwIO $ BaseException ("parser error: " ++ show e)
+        Left e -> throwIO $ CommandException ("parser error: " ++ show e)
     valDefList' <- parseCodeFiles codeFiles
     return (valDefList ++ valDefList')
 
@@ -38,7 +38,7 @@ subcommand args = do
     let valDefMap = valDefListToMap valDefList
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm Set.empty valDefMap v
-        Nothing -> throwIO $ BaseException ("not found " ++ functionName)
+        Nothing -> throwIO $ CommandException ("not found " ++ functionName)
     let result = calculateNormalResult lambdaTerm
     print result
 

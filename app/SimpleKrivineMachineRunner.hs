@@ -6,7 +6,7 @@ import LambdaParser.UntypedLambdaParser
 import UntypedLambdaCalculus.KrivineMachine
 import UntypedLambdaCalculus.LambdaTermTools
 
-import BaseException
+import CommandException
 import CommandArg
 
 import qualified Data.Map as Map
@@ -72,7 +72,7 @@ parseCodeFiles (codeFile : codeFiles) = do
     codeContent <- hGetContents handle
     valDefList <- case runParseCode codeFile codeContent of
         Right result -> return result
-        Left e -> throwIO $ BaseException ("parser error: " ++ show e)
+        Left e -> throwIO $ CommandException ("parser error: " ++ show e)
     valDefList' <- parseCodeFiles codeFiles
     return (valDefList ++ valDefList')
 
@@ -86,16 +86,16 @@ subcommand args = do
     let wrapperCode = "ioWrapper___ = λf.f (λx. x O1___ O0___); P___ = ioWrapper___ ((main input___)); "
     wrapperValDefList <- case runParseCode "(wrapperCode)" wrapperCode of
         Right result -> return result
-        Left e -> throwIO $ BaseException ("parser error: " ++ show e)
+        Left e -> throwIO $ CommandException ("parser error: " ++ show e)
 
     let valDefMap = valDefListToMap (wrapperValDefList ++ valDefList)
 
     mainLambdaTerm <- case Map.lookup "P___" valDefMap of
         Just v -> return $ toLambdaTerm Set.empty valDefMap v
-        Nothing -> throwIO $ BaseException "not found P___"
+        Nothing -> throwIO $ CommandException "not found P___"
     ioWrapper <- case Map.lookup "ioWrapper___" valDefMap of
         Just v -> return $ toLambdaTerm Set.empty valDefMap v
-        Nothing -> throwIO $ BaseException "not found ioWrapper___"
+        Nothing -> throwIO $ CommandException "not found ioWrapper___"
     
     let globalFreeVariableMap = Map.fromList [("O0___", -1), ("O1___", -2), ("input___", -3)]
     let ioWrapperDeBruijnLambdaTerm = lambdaTermToDeBruijnLambdaTerm globalFreeVariableMap [Map.empty] ioWrapper

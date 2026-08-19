@@ -3,8 +3,9 @@ module SimpleLang (subcommand) where
 import UntypedLambdaCalculus.LambdaTerm
 import LambdaParser.UntypedLambdaParser
 import UntypedLambdaCalculus.LambdaReduction (calculateWeakNormalHeadResult)
-import BaseException
+import CommandException
 import CommandArg
+import SimpleLangException
 
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -13,7 +14,7 @@ import GHC.IO.Handle (hSetEncoding, hGetContents)
 import GHC.IO.Encoding (utf8)
 import GHC.IO.IOMode (IOMode(ReadMode))
 import GHC.IO.Handle.FD (openFile)
-import Control.Exception (throwIO)
+import Control.Exception (throw, throwIO, try)
 import Data.Char (chr, ord)
 import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
 
@@ -24,7 +25,7 @@ toSimpleLangString str = ('\'' : str)
 
 fromSimpleLangString :: String -> String
 fromSimpleLangString ('\'' : str) = str
-fromSimpleLangString _ = error "not string"
+fromSimpleLangString _ = throw (SimpleLangException "not string")
 
 toSimpleLangInt :: Integer -> String
 toSimpleLangInt i = show i
@@ -39,7 +40,7 @@ toSimpleLangBool False = "false"
 fromSimpleLangBool :: String -> Bool
 fromSimpleLangBool "true" = True
 fromSimpleLangBool "false" = False
-fromSimpleLangBool _ = error "not bool"
+fromSimpleLangBool _ = throw (SimpleLangException "not bool")
 
 matchFunction :: LambdaTerm -> StateT ObjectState IO String
 
@@ -79,7 +80,7 @@ matchFunction (Application (Application (Application (Variable "map-put") arg1) 
     let simpleLangIntMapCount = toSimpleLangInt mapCount
     arg1Map <- case Map.lookup arg1val objectMap of
         Just v -> return v
-        Nothing -> error "no map"
+        Nothing -> throw (SimpleLangException "no map")
     let resultMap = Map.insert arg2val arg3val arg1Map
     put (ObjectState (mapCount + 1) (Map.insert simpleLangIntMapCount resultMap objectMap))
     return simpleLangIntMapCount
@@ -91,7 +92,7 @@ matchFunction (Application (Application (Variable "map-delete") arg1) arg2)= do
     let simpleLangIntMapCount = toSimpleLangInt mapCount
     arg1Map <- case Map.lookup arg1val objectMap of
         Just v -> return v
-        Nothing -> error "no map"
+        Nothing -> throw (SimpleLangException "no map")
     let resultMap = Map.delete arg2val arg1Map
     put (ObjectState (mapCount + 1) (Map.insert simpleLangIntMapCount resultMap objectMap))
     return simpleLangIntMapCount
@@ -102,7 +103,7 @@ matchFunction (Application (Application (Variable "map-has-key") arg1) arg2) = d
     (ObjectState _ objectMap) <- get
     arg1Map <- case Map.lookup arg1val objectMap of
         Just v -> return v
-        Nothing -> error "no map"
+        Nothing -> throw (SimpleLangException "no map")
     return (toSimpleLangBool (Map.member arg2val arg1Map))
 
 matchFunction (Application (Application (Variable "map-get") arg1) arg2) = do
@@ -111,10 +112,10 @@ matchFunction (Application (Application (Variable "map-get") arg1) arg2) = do
     (ObjectState _ objectMap) <- get
     arg1Map <- case Map.lookup arg1val objectMap of
         Just v -> return v
-        Nothing -> error "no map"
+        Nothing -> throw (SimpleLangException "no map")
     result <- case Map.lookup arg2val arg1Map of
         Just v -> return v
-        Nothing -> error "no map key"
+        Nothing -> throw (SimpleLangException "no map key")
     return result
 
 matchFunction (Application (Variable "map-size") arg1) = do
@@ -122,7 +123,7 @@ matchFunction (Application (Variable "map-size") arg1) = do
     (ObjectState _ objectMap) <- get
     arg1Map <- case Map.lookup arg1val objectMap of
         Just v -> return v
-        Nothing -> error "no map"
+        Nothing -> throw (SimpleLangException "no map")
     let result = Map.size arg1Map
     return (toSimpleLangInt (toInteger result))
 
@@ -132,7 +133,7 @@ matchFunction (Application (Application (Application (Variable "map-fold")  arg1
     (ObjectState _ objectMap) <- get
     arg1Map <- case Map.lookup arg1val objectMap of
         Just v -> return v
-        Nothing -> error "no map"
+        Nothing -> throw (SimpleLangException "no map")
     result <- Map.foldlWithKey foldFunc (return arg3val) arg1Map
     return result
     where foldFunc v key value = do
@@ -154,8 +155,8 @@ matchFunction (Application (Variable "char-to-int")  arg1) = do
     let arg1stringval = fromSimpleLangString arg1val
     case arg1stringval of
         c : "" -> return (toSimpleLangInt (toInteger (ord c)))
-        "" -> error "char (string) length must be 1"
-        _ -> error "char (string) length must be 1"
+        "" -> throw (SimpleLangException "char (string) length must be 1")
+        _ -> throw (SimpleLangException "char (string) length must be 1")
 
 matchFunction (Application (Variable "string-length")  arg1) = do
     arg1val <- evalExpr arg1
@@ -249,7 +250,7 @@ matchFunction (Application (Application (Application (Variable "if")  arg1) arg2
 
 
 matchFunction (Variable a) = return a
-matchFunction _ = error "match function error"
+matchFunction _ = throw (SimpleLangException "match function error")
 
 evalExpr :: LambdaTerm -> StateT ObjectState IO String
 evalExpr lambdaTerm = do
@@ -265,7 +266,7 @@ parseCodeFiles (codeFile : codeFiles) = do
     codeContent <- hGetContents handle
     valDefList <- case runParseCode codeFile codeContent of
         Right result -> return result
-        Left e -> throwIO $ BaseException ("parser error: " ++ show e)
+        Left e -> throwIO $ CommandException ("parser error: " ++ show e)
     valDefList' <- parseCodeFiles codeFiles
     return (valDefList ++ valDefList')
 
@@ -281,6 +282,8 @@ subcommand args = do
     let valDefMap = valDefListToMap valDefList
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm Set.empty valDefMap v
-        Nothing -> throwIO $ BaseException ("not found " ++ functionName)
-    _ <- runStateT (evalExpr (readLambdaTerm (show lambdaTerm))) (ObjectState 0 Map.empty)
-    return ()
+        Nothing -> throwIO $ CommandException ("not found " ++ functionName)
+    result <- try (runStateT (evalExpr (readLambdaTerm (show lambdaTerm))) (ObjectState 0 Map.empty))
+    case result of
+        Left e -> throwIO (CommandException ("SimpleLang runtime error: " ++ show (e :: SimpleLangException)))
+        Right v -> return ()
