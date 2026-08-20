@@ -75,6 +75,8 @@ showLambdaTerm (Abstraction variableName lambdaTerm) =
 showLambdaTerm (Application functionLambdaTerm argumentLambdaTerm) =
     "(" ++ show functionLambdaTerm ++ " " ++ show argumentLambdaTerm ++ ")"
 
+instance Read LambdaTerm where
+    readsPrec _ = (\v -> [((readLambdaTerm v), "")])
 
 readLambdaTerm :: String -> LambdaTerm
 readLambdaTerm lambdaTermString =
