@@ -7,7 +7,7 @@
 - 支持对Lambda Cube表达式进行类型检查，支持自定义规则
 - Krivine Machine与Lazy Krivine Machine
 - 支持扩展语法的Lambda项文本解析器
-- 简单的编程语言
+- 简单的编程语言（不支持垃圾回收）
 
 ## 基本使用方法
 
