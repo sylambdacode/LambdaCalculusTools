@@ -42,6 +42,10 @@ fromSimpleLangBool "true" = True
 fromSimpleLangBool "false" = False
 fromSimpleLangBool _ = throw (SimpleLangException "not bool")
 
+toSimpleLangObjectIndex :: Integer -> String
+toSimpleLangObjectIndex index = '@' : (show index)
+
+
 matchFunction :: LambdaTerm -> StateT ObjectState IO String
 
 matchFunction (Application (Application (Variable "string-concat")  arg1) arg2) = do
@@ -68,7 +72,7 @@ matchFunction (Application (Variable "int-to-string")  arg1) = do
 
 matchFunction (Variable "map-create") = do
     (ObjectState mapCount objectMap) <- get
-    let simpleLangIntMapCount = toSimpleLangInt mapCount
+    let simpleLangIntMapCount = toSimpleLangObjectIndex mapCount
     put (ObjectState (mapCount + 1) (Map.insert simpleLangIntMapCount Map.empty objectMap))
     return simpleLangIntMapCount
 
@@ -77,7 +81,7 @@ matchFunction (Application (Application (Application (Variable "map-put") arg1) 
     arg2val <- evalExpr arg2
     arg3val <- evalExpr arg3
     (ObjectState mapCount objectMap) <- get
-    let simpleLangIntMapCount = toSimpleLangInt mapCount
+    let simpleLangIntMapCount = toSimpleLangObjectIndex mapCount
     arg1Map <- case Map.lookup arg1val objectMap of
         Just v -> return v
         Nothing -> throw (SimpleLangException "no map")
@@ -89,7 +93,7 @@ matchFunction (Application (Application (Variable "map-delete") arg1) arg2)= do
     arg1val <- evalExpr arg1
     arg2val <- evalExpr arg2
     (ObjectState mapCount objectMap) <- get
-    let simpleLangIntMapCount = toSimpleLangInt mapCount
+    let simpleLangIntMapCount = toSimpleLangObjectIndex mapCount
     arg1Map <- case Map.lookup arg1val objectMap of
         Just v -> return v
         Nothing -> throw (SimpleLangException "no map")
@@ -140,6 +144,13 @@ matchFunction (Application (Application (Application (Variable "map-fold")  arg1
               v' <- v
               r <- evalExpr (Application (Application (Application arg2 (Variable v')) (Variable key)) (Variable value))
               return r
+
+matchFunction (Application (Variable "map-destroy")  arg1) = do
+    arg1val <- evalExpr arg1
+    (ObjectState objectCount objectMap) <- get
+    let objectMap' = Map.delete arg1val objectMap
+    put (ObjectState objectCount objectMap')
+    return arg1val
 
 matchFunction (Application (Variable "string-to-int")  arg1) = do
     arg1val <- evalExpr arg1
@@ -252,6 +263,7 @@ matchFunction (Application (Application (Application (Variable "if")  arg1) arg2
 matchFunction (Variable a) = return a
 matchFunction _ = throw (SimpleLangException "match function error")
 
+
 evalExpr :: LambdaTerm -> StateT ObjectState IO String
 evalExpr lambdaTerm = do
     let l = calculateWeakNormalHeadResult lambdaTerm
@@ -286,4 +298,4 @@ subcommand args = do
     result <- try (runStateT (evalExpr (readLambdaTerm (show lambdaTerm))) (ObjectState 0 Map.empty))
     case result of
         Left e -> throwIO (CommandException ("SimpleLang runtime error: " ++ show (e :: SimpleLangException)))
-        Right v -> return ()
+        Right _ -> return ()

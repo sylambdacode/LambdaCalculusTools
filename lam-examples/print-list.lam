@@ -2,7 +2,8 @@
 
 
 {-
-map(int -> string) as string list
+map(int -> string) as string list,
+There is no GC, map-destroy function can free memory.
 -}
 
 main = cps {
@@ -10,6 +11,7 @@ main = cps {
     list <- strict (append-100-element list);
     _ <- strict (printList' list);
     _ <- strict (printList list 0);
+    _ <- strict (map-destroy list);
     _
 };
 
@@ -42,13 +44,19 @@ printList' = ^list.
 append-100-element = Y ^self. ^list. cps {
     index <- strict (map-size list);
     value <- strict (string-concat "'string value" (int-to-string (int-add index 1)));
-    list <- strict (map-put list index value);
+    list <- strict (with-destroy list (map-put list index value));
     if (eq (map-size list) 100)
         (list)
         cps {
             v <- strict (self list);
             v
         }
+};
+
+with-destroy = ^list1 list2. cps {
+    list2 <- strict list2;
+    _ <- strict (map-destroy list1);
+    list2
 };
 
 Y = (λu x. x (u u x)) (λu x. x (u u x));
