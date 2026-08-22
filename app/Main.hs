@@ -6,9 +6,8 @@ import qualified SimpleKrivineMachineRunner as SimpleKrivineMachineRunner
 import CommandException
 
 import System.Environment(getArgs)
-import GHC.IO.Handle.FD (stderr)
 import Control.Exception (throw, try)
-import GHC.IO.Handle.Text (hPutStrLn)
+import System.IO (stderr, hPutStrLn)
 
 
 mainHandler :: IO ()

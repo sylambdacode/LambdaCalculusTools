@@ -8,7 +8,8 @@ main = cps {
 
 
 loop = Y ^self. ^answer. ^cont. cps {
-    stringvalue <- readline;
+    stringvalue is-eof <- readline;
+    if is-eof (print "'read EOF, exit.\n" (^_. cont answer))
     let number = string-to-int stringvalue; in
     if (eq number answer)
         cps {

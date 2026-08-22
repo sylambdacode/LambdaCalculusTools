@@ -10,10 +10,8 @@ import SimpleLangException
 import Data.Map (Map)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import GHC.IO.Handle (hSetEncoding, hGetContents)
-import GHC.IO.Encoding (utf8)
-import GHC.IO.IOMode (IOMode(ReadMode))
-import GHC.IO.Handle.FD (openFile)
+import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode))
+import System.IO.Error (isEOFError)
 import Control.Exception (throw, throwIO, try)
 import Data.Char (chr, ord)
 import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
@@ -59,8 +57,11 @@ matchFunction (Application (Application (Variable "print")  arg1) arg2) = do
     evalExpr (Application arg2 (Variable "'"))
 
 matchFunction (Application (Variable "readline")  arg1) = do
-    line <- liftIO getLine
-    evalExpr (Application arg1 (Variable (toSimpleLangString line)))
+    lineEither <- liftIO (try getLine)
+    (line, isEof) <- case lineEither of
+        Right line -> return (line, False)
+        Left e -> if isEOFError (e :: IOError) then return ("", True) else throw e
+    evalExpr (Application (Application arg1 (Variable (toSimpleLangString line))) (Variable (toSimpleLangBool isEof)))
 
 matchFunction (Application (Application (Variable "strict")  arg1) arg2) = do
     arg1val <- evalExpr arg1

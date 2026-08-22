@@ -7,10 +7,7 @@ import CommandArg
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import GHC.IO.Handle (hSetEncoding, hGetContents)
-import GHC.IO.Encoding (utf8)
-import GHC.IO.IOMode (IOMode(ReadMode))
-import GHC.IO.Handle.FD (openFile)
+import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode))
 import Control.Exception (throwIO)
 
 

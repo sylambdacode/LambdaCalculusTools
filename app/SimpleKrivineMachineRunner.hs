@@ -13,10 +13,7 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import GHC.TopHandler (flushStdHandles)
 import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
-import GHC.IO.Handle (isEOF, hSetEncoding, hGetContents)
-import GHC.IO.Encoding (utf8)
-import GHC.IO.IOMode (IOMode(ReadMode))
-import GHC.IO.Handle.FD (openFile)
+import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode), isEOF)
 import Control.Exception (throwIO)
 
 get1Or0Char :: IO Char
