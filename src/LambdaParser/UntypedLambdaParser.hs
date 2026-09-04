@@ -10,7 +10,7 @@ import qualified Data.Map as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 
-data Expr = Var String | ExprList [Expr] | Lam [String] Expr | Cps [CpsItem] Expr | Let ValDef Expr
+data Expr = Var String | ExprList [Expr] | Lam [String] Expr | Cps [CpsItem] Expr | Let [ValDef] Expr
 data CpsItem = CpsItem [String] Expr
 
 instance Show Expr where
@@ -91,12 +91,12 @@ parseCpsItem = CpsItem
 
 parseLet :: UntypedLambdaParser Expr
 parseLet = Let
-    <$> (try ((parseKeywordToken "let")) *> parseValDef)
+    <$> (try ((parseKeywordToken "let")) *> (many1 (parseValDef)))
     <*> (parseKeywordToken "in" *> parseExprs)
 
 parseValDef :: UntypedLambdaParser ValDef
 parseValDef = ValDef
-    <$> try parseNameTokenString
+    <$> ((try parseNameTokenString) <?> "name (name = epxression;)")
     <*> ((parseSymbolToken "=") *> parseExprs <* (parseSymbolToken ";" <?> "\";\""))
 
 parseValDefs :: UntypedLambdaParser [ValDef]
@@ -124,7 +124,18 @@ lambdaFunction (variableName : []) bodyLambdaTerm =
 lambdaFunction (variableName : otherVariableNameList) bodyLambdaTerm =
     Abstraction variableName (lambdaFunction otherVariableNameList bodyLambdaTerm)
 
+handleLetExpression :: Expr -> Expr
+handleLetExpression (Let (valDef : []) expr) = Let (valDef : []) expr
+handleLetExpression (Let (valDef : valDefs) expr) = Let (valDef : []) (Let valDefs expr)
+handleLetExpression (Let [] _) = error "error let expression"
+handleLetExpression _ = error "not let expression"
 
+toLetLambdaTerm :: Set String -> Map String Expr -> Expr -> LambdaTerm
+toLetLambdaTerm varSet valDefMap (Let ((ValDef name val) : []) expr) =
+    Application bodyLambdaTerm argLambdaTerm
+    where bodyLambdaTerm = Abstraction name (toLambdaTerm (Set.insert name varSet) valDefMap expr)
+          argLambdaTerm = toLambdaTerm varSet valDefMap val
+toLetLambdaTerm _ _ _ = error "error let expression"
 
 toLambdaTerm :: Set String -> Map String Expr -> Expr -> LambdaTerm
 toLambdaTerm varSet valDefMap (Var name) =
@@ -140,9 +151,8 @@ toLambdaTerm varSet valDefMap (Cps [] finalExprs) = toLambdaTerm varSet valDefMa
 toLambdaTerm varSet valDefMap (Cps ((CpsItem names expr) : xs) finalExprs) =
     Application (toLambdaTerm varSet valDefMap expr)
         (lambdaFunction names (toLambdaTerm varSet valDefMap (Cps xs finalExprs)))
-toLambdaTerm varSet valDefMap (Let (ValDef name val) expr) =
-    Application (Abstraction name (toLambdaTerm (Set.insert name varSet) valDefMap expr)) (toLambdaTerm varSet valDefMap val)
-
+toLambdaTerm varSet valDefMap (Let valDefs expr) = toLetLambdaTerm varSet valDefMap handledLetExpression
+    where handledLetExpression = handleLetExpression (Let valDefs expr)
 
 valDefListToMap :: [ValDef] -> Map String Expr
 valDefListToMap valDefList = Map.fromList (map valDefToPair valDefList)
