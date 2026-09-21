@@ -262,7 +262,7 @@ matchFunction (Application (Application (Application (Variable "if")  arg1) arg2
 
 
 matchFunction (Variable a) = return a
-matchFunction _ = throw (SimpleLangException "match function error")
+matchFunction lambdaTerm = throw (SimpleLangException ("match function error: " ++ show lambdaTerm))
 
 
 evalExpr :: LambdaTerm -> StateT ObjectState IO String

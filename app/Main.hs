@@ -23,7 +23,7 @@ mainHandler = do
             SimpleCalculator.subcommand (drop 1 args)
         "simplelang" -> do
             SimpleLang.subcommand (drop 1 args)
-        _ -> throw $ CommandException "unknown mode"
+        _ -> throw $ CommandException ("unknown mode: " ++ mode)
 
 main :: IO ()
 main = do
