@@ -9,13 +9,17 @@ import CommandArg
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode))
-import Control.Exception (throwIO)
+import Control.Exception (throw, throwIO)
 
 
 matchFunction :: LambdaTerm -> LambdaTerm
 
 matchFunction (Application (Application (Variable "strict")  arg1) arg2) =
-    let arg1NormalResult = evalLambdaTerm arg1
+    let arg1Value = evalLambdaTerm arg1
+    in (Application arg2 arg1Value)
+
+matchFunction (Application (Application (Variable "strict-normal")  arg1) arg2) =
+    let arg1NormalResult = calculateNormalResult arg1
     in (Application arg2 arg1NormalResult)
 
 matchFunction lambdaTerm = lambdaTerm
@@ -26,7 +30,7 @@ evalLambdaTerm :: LambdaTerm -> LambdaTerm
 evalLambdaTerm lambdaTerm =
     let result = matchFunction (calculateWeakNormalHeadResult lambdaTerm)
     in if isWeakNormalHeadForm result
-           then calculateNormalResult result
+           then result
            else evalLambdaTerm result
 
 
@@ -49,13 +53,20 @@ subcommand args = do
     functionName <- case lookup "f" argList of
         Just v -> return v
         Nothing -> return "main"
+    calculateType <- case lookup "t" argList of
+        Just v -> return v
+        Nothing -> return "type1"
+
     let codeFiles = map (\(_, value) -> value) (filter (\(name, _) -> (name == "")) argList)
     valDefList <- parseCodeFiles codeFiles
     let valDefMap = valDefListToMap valDefList
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm Set.empty valDefMap v
         Nothing -> throwIO $ CommandException ("not found " ++ functionName)
-    let result = evalLambdaTerm lambdaTerm
+    let result = case calculateType of
+                     "type1" -> calculateNormalResult lambdaTerm
+                     "type2" -> evalLambdaTerm lambdaTerm
+                     unknownType -> throw $ CommandException ("unknown calculate type: " ++ unknownType)
     print result
 
 
