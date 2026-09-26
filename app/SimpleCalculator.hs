@@ -1,7 +1,8 @@
 module SimpleCalculator (subcommand) where
 
 import LambdaParser.UntypedLambdaParser
-import UntypedLambdaCalculus.LambdaReduction (calculateNormalResult)
+import UntypedLambdaCalculus.LambdaTerm (LambdaTerm (Variable, Application))
+import UntypedLambdaCalculus.LambdaReduction (calculateNormalResult, calculateWeakNormalHeadResult, isWeakNormalHeadForm)
 import CommandException
 import CommandArg
 
@@ -9,6 +10,24 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode))
 import Control.Exception (throwIO)
+
+
+matchFunction :: LambdaTerm -> LambdaTerm
+
+matchFunction (Application (Application (Variable "strict")  arg1) arg2) =
+    let arg1NormalResult = evalLambdaTerm arg1
+    in (Application arg2 arg1NormalResult)
+
+matchFunction lambdaTerm = lambdaTerm
+
+
+evalLambdaTerm :: LambdaTerm -> LambdaTerm
+
+evalLambdaTerm lambdaTerm =
+    let result = matchFunction (calculateWeakNormalHeadResult lambdaTerm)
+    in if isWeakNormalHeadForm result
+           then calculateNormalResult result
+           else evalLambdaTerm result
 
 
 parseCodeFiles :: [String] -> IO ([ValDef])
@@ -36,7 +55,7 @@ subcommand args = do
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm Set.empty valDefMap v
         Nothing -> throwIO $ CommandException ("not found " ++ functionName)
-    let result = calculateNormalResult lambdaTerm
+    let result = evalLambdaTerm lambdaTerm
     print result
 
 
