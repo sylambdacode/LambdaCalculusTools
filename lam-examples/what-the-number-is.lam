@@ -2,12 +2,12 @@
 
 main = cps {
     _ <- print "'Please input a integer:\n";
-    _ <- loop 100;
+    _ <- main-loop 1000;
     _
 };
 
 
-loop = Y ^self. ^answer. ^cont. cps {
+main-loop = Y ^self. ^answer. ^cont. cps {
     stringvalue is-eof <- readline;
     if is-eof (print "'read EOF, exit.\n" (^_. cont answer))
     let number = string-to-int stringvalue; in
