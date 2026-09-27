@@ -25,19 +25,21 @@ substitute (Variable name) variableName lambdaTerm =
         else Variable name
 
 substitute (Application functionLambdaTerm argumentLambdaTerm) variableName lambdaTerm =
-    Application (substitute functionLambdaTerm variableName lambdaTerm) (substitute argumentLambdaTerm variableName lambdaTerm)
+    Application functionLambdaTerm' argumentLambdaTerm'
+    where functionLambdaTerm' = substitute functionLambdaTerm variableName lambdaTerm
+          argumentLambdaTerm' = substitute argumentLambdaTerm variableName lambdaTerm
 
 substitute (Abstraction variableName bodyLambdaTerm) substitutedVariableName lambdaTerm
     | variableName == substitutedVariableName = Abstraction variableName bodyLambdaTerm
-    | not (substitutedVariableName `Set.member` bodyLambdaTermFvSet) = Abstraction variableName bodyLambdaTerm
-    | not (variableName `Set.member` lambdaTermFvSet) = Abstraction variableName (substitute bodyLambdaTerm substitutedVariableName lambdaTerm)
-    -- | variableName `Set.member` lambdaTermFvSet = Abstraction newVariableName (substitute newBodyLambdaTerm substitutedVariableName lambdaTerm)
+    | not (Set.member substitutedVariableName bodyLambdaTermFvSet) = Abstraction variableName bodyLambdaTerm
+    | not (Set.member variableName lambdaTermFvSet) = Abstraction variableName (substitute bodyLambdaTerm substitutedVariableName lambdaTerm)
+    -- | Set.member variableName lambdaTermFvSet = Abstraction newVariableName (substitute newBodyLambdaTerm substitutedVariableName lambdaTerm)
     | otherwise = Abstraction newVariableName (substitute newBodyLambdaTerm substitutedVariableName lambdaTerm)
         where newBodyLambdaTerm = substitute bodyLambdaTerm variableName (Variable newVariableName)
               bodyLambdaTermFvSet = fvSet bodyLambdaTerm
               lambdaTermFvSet = fvSet lambdaTerm
               newVariableName = getNewVariableName variableName
-              getNewVariableName name = if not (name `Set.member` lambdaTermFvSet) then name else getNewVariableName (name ++ "_")
+              getNewVariableName name = if Set.member name lambdaTermFvSet then getNewVariableName (name ++ "_") else name
 
 
 
