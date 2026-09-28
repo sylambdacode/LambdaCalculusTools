@@ -71,6 +71,32 @@ bits-cmp-cps = λm n cont. cps {
             ignore-sign-result) {- n >= 0 -}
 };
 
+
+bits-lt-cps = ^a b cont. cps {
+    cmp-result <- bits-cmp-cps a b;
+    cont (cmp-result true false false)
+};
+
+bits-le-cps = ^a b cont. cps {
+    cmp-result <- bits-cmp-cps a b;
+    cont (cmp-result true true false)
+};
+
+bits-eq-cps = ^a b cont. cps {
+    cmp-result <- bits-cmp-cps a b;
+    cont (cmp-result false true false)
+};
+
+bits-gt-cps = ^a b cont. cps {
+    cmp-result <- bits-cmp-cps a b;
+    cont (cmp-result false false true)
+};
+
+bits-ge-cps = ^a b cont. cps {
+    cmp-result <- bits-cmp-cps a b;
+    cont (cmp-result false true true)
+};
+
 bits-left-shift-1-cps = λa cont. match-nil-cons-x-xs a
             ⊥
             (λx xs. cps {
