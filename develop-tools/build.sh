@@ -1,4 +1,4 @@
 #!/bin/sh
-mkdir bin
-gcc binarystrtobyte.c -o bin/binarystrtobyte
-gcc bytetobinarystr.c -o bin/bytetobinarystr
+mkdir build
+gcc binarystrtobyte.c -o build/binarystrtobyte
+gcc bytetobinarystr.c -o build/bytetobinarystr
