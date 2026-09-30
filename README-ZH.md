@@ -14,8 +14,16 @@
 规约Lambda表达式：
 
 ```
-lambda-calculus-tools-main calculate -f f lam-examples/reducation.lam
+lambda-calculus-tools-main calculate -t type1 -f main1 lam-examples/reducation.lam
 ```
+
+规约Lambda表达式（扩展模式）：
+
+```
+lambda-calculus-tools-main calculate -t type2 -f main2 lam-examples/reducation.lam
+```
+
+使用`-t type2`参数能够使用一些扩展函数。
 
 运行Lazy Krivine Machine：
 
