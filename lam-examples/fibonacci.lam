@@ -1,0 +1,79 @@
+{-
+use calculate subcommand
+add subcommand argument: -f main1
+add subcommand argument: -t type1
+require lam-lib
+-}
+
+main1 = cps {
+    r <- fibonacci-cps N-5;
+    r
+};
+
+
+{-
+use calculate subcommand
+add subcommand argument: -f main2
+add subcommand argument: -t type2
+require lam-lib
+-}
+
+main2 = cps {
+    r <- strict (fibonacci-cps' N-5 id);
+    r
+};
+
+
+
+integer = λb1 b2 b3 b4 b5 b6 b7 b8. cons b1 (cons b2 (cons b3 (cons b4 (cons b5 (cons b6 (cons b7 (cons b8 nil)))))));
+
+N-1 = integer false false false false false false false true;
+N-2 = integer false false false false false false true false;
+N-3 = integer false false false false false false true true;
+N-4 = integer false false false false false true false false;
+N-5 = integer false false false false false true false true;
+
+bits-eq-cps = ^a b cont. cps {
+    cmp-result <- bits-cmp-cps a b;
+    cont (cmp-result false true false)
+};
+
+
+fibonacci-cps = Y λself n cont. cps {
+    n-eq-1 <- bits-eq-cps n N-1;
+    if-then-else n-eq-1
+        (cont N-1)
+        (cps {
+            n-eq-2 <- bits-eq-cps n N-2;
+            if-then-else n-eq-2
+                (cont N-2)
+                (cps {
+                     n-sub-1 <- bits-sub-cps n N-1;
+                     n-sub-2 <- bits-sub-cps n N-2;
+                     r1 <- self n-sub-1;
+                     r2 <- self n-sub-2;
+                     r1-add-r2 <- bits-add-cps r1 r2;
+                     cont r1-add-r2
+                 })
+         })
+};
+
+fibonacci-cps' = Y λself n cont. cps {
+    n-eq-1 <- strict-normal (bits-eq-cps n N-1 id);
+    r <- strict (if-then-else n-eq-1
+        (cont N-1)
+        (cps {
+            n-eq-2 <- (bits-eq-cps n N-2);
+            if-then-else n-eq-2
+                (cont N-2)
+                (cps {
+                     n-sub-1 <- strict-normal (bits-sub-cps n N-1 id);
+                     n-sub-2 <- strict-normal (bits-sub-cps n N-2 id);
+                     r1 <- strict (self n-sub-1 id);
+                     r2 <- strict (self n-sub-2 id);
+                     r1-add-r2 <- strict (bits-add-cps r1 r2 id);
+                     cont r1-add-r2
+                 })
+         }));
+    strict-normal r id
+};
