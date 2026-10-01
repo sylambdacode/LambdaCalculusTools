@@ -25,7 +25,7 @@ lambda-calculus-tools-main calculate -t type2 -f main2 lam-examples/reducation.l
 
 使用`-t type2`参数能够使用一些扩展函数。
 
-运行Lazy Krivine Machine：
+运行Krivine Machine：
 
 ```
 lambda-calculus-tools-main runKrivineMachine lam-examples/hello-world.lam lam-lib/*.lam
@@ -52,8 +52,8 @@ lambda-calculus-tools-main simplelang lam-examples/what-the-number-is.lam
 ### Lambda项命名
 
 ```
-N_2 = \f x. f (f x);
-pow2 = \x. x N_2
+N_2 = ^f x. f (f x);
+pow2 = ^x. x N_2
 main = pow2 (λf x. f (f (f x)));
 ```
 
@@ -113,4 +113,6 @@ main = f a (λv1 v2. (g v1 v2 (λv3. v3)));
 
 由于Lambda Calculus本身具有强大的表达能力，因此添加上述扩展语法后能够更加方便地将Lambda Calculus作为一门编程语言来编写程序。
 
-可以在lam与lam-examples目录下找到更多内容。
+可以在lam-lib与lam-examples目录下找到更多内容。
+
+lam-lib中包含一些通用Lambda函数，lam-examples中包含一些例子代码。
