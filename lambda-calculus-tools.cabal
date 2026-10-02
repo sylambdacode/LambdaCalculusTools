@@ -1,7 +1,5 @@
-{-
-Copyright (c) 2025 sylambdacode
-SPDX-License-Identifier: MIT
--}
+-- Copyright (c) 2025 sylambdacode
+-- SPDX-License-Identifier: MIT
 
 cabal-version:      3.0
 
