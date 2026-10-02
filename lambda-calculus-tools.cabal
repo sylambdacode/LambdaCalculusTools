@@ -1,7 +1,7 @@
+cabal-version:      3.0
+
 -- Copyright (c) 2025 sylambdacode
 -- SPDX-License-Identifier: MIT
-
-cabal-version:      3.0
 
 name:               lambda-calculus-tools
 
