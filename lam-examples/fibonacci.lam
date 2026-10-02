@@ -1,4 +1,9 @@
 {-
+Copyright (c) 2025 sylambdacode
+SPDX-License-Identifier: MIT
+-}
+
+{-
 use calculate subcommand
 add subcommand argument: -f main1
 add subcommand argument: -t type1

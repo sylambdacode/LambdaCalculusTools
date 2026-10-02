@@ -1,4 +1,9 @@
 {-
+Copyright (c) 2025 sylambdacode
+SPDX-License-Identifier: MIT
+-}
+
+{-
 本文件内容为开发过程中使用的临时代码
 -}
 

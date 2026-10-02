@@ -1,3 +1,8 @@
+{-
+Copyright (c) 2025 sylambdacode
+SPDX-License-Identifier: MIT
+-}
+
 factorial-cps = Y λself n r cont. cps {
     f <- bits-iszero-cps n;
     if-then-else f

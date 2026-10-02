@@ -1,3 +1,8 @@
+{-
+Copyright (c) 2025 sylambdacode
+SPDX-License-Identifier: MIT
+-}
+
 bit-add-cps = λc m n cont. if-then-else (and m n)
             (cont true c)
             (if-then-else (or (and m (not n)) (and (not m) n))

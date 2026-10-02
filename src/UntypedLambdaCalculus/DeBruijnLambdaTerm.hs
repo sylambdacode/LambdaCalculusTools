@@ -1,3 +1,8 @@
+{-
+Copyright (c) 2025 sylambdacode
+SPDX-License-Identifier: MIT
+-}
+
 module UntypedLambdaCalculus.DeBruijnLambdaTerm where
 
 data DeBruijnLambdaTerm = Variable Int | Abstraction DeBruijnLambdaTerm | Application DeBruijnLambdaTerm DeBruijnLambdaTerm

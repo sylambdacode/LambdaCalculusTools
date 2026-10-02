@@ -1,3 +1,8 @@
+{-
+Copyright (c) 2025 sylambdacode
+SPDX-License-Identifier: MIT
+-}
+
 module SimpleTypedLambdaCalculus.SimpleType where
 
 data SimpleType = AtomicType String | FunctionType SimpleType SimpleType

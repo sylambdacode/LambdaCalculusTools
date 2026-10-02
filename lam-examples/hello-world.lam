@@ -1,4 +1,9 @@
 {-
+Copyright (c) 2025 sylambdacode
+SPDX-License-Identifier: MIT
+-}
+
+{-
 use runKrvineMachine subcommand
 require lam-lib
 -}
