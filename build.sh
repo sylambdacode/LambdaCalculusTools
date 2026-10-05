@@ -5,7 +5,7 @@
 
 
 
-cd develop-tools
+cd additional-tools
 ./build.sh
 cd ..
 

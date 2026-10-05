@@ -9,7 +9,8 @@ int main() {
     char c;
     while ((c = getchar()) != EOF) {
         for (int i = 7; i >= 0; i--) {
-            printf("%d", (c >> i) & 1);
+            int bit = (c >> i) & 1;
+            printf("%d", bit);
         }
         fflush(stdout);
     }

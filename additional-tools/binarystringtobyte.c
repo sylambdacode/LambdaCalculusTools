@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 int main() {
     char c = 0;
     int i = 0;
-    char output_c = 0;
+    char result_char = 0;
     while ((c = getchar()) != EOF) {
         char bit;
         if (c == '1') {
@@ -18,11 +18,12 @@ int main() {
         } else {
             continue;
         }
-        output_c = (output_c << 1) | bit;
+        result_char = (result_char << 1) | bit;
         i++;
         if (i == 8) {
             i = 0;
-            printf("%c", output_c);
+            printf("%c", result_char);
+            fflush(stdout);
         }
     }
     return 0;
