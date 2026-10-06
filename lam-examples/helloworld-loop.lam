@@ -14,7 +14,7 @@ main = cps {
 loop = Y ^self. ^a. ^cont. cps {
     _ <- print (string-concat "'helloworld" (int-to-string a));
     _ <- print "'\n";
-    if (eq a 100)
+    if (eq a 1000)
         (cont a)
         cps {
             _ <- self (int-add a 1);
