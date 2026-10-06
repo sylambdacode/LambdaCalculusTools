@@ -7,7 +7,7 @@ import CommandException
 
 import System.Environment(getArgs)
 import Control.Exception (throw, try)
-import System.IO (stderr, hPutStrLn, hSetEncoding, stdout, utf8)
+import System.IO (stderr, hPutStrLn, hSetEncoding, stdout, utf8, stdin)
 
 
 mainHandler :: IO ()
@@ -27,6 +27,7 @@ mainHandler = do
 
 main :: IO ()
 main = do
+    hSetEncoding stdin utf8
     hSetEncoding stdout utf8
     hSetEncoding stderr utf8
     result <- try mainHandler
