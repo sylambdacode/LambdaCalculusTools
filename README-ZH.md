@@ -33,10 +33,10 @@ lambda-calculus-tools-main runKrivineMachine lam-examples/hello-world.lam lam-li
 
 运行通过扩展Lambda演算而实现的的简单编程语言：
 
-打印100次Hello World
+循环打印Hello World
 
 ```
-lambda-calculus-tools-main simplelang lam-examples/helloworld100times.lam
+lambda-calculus-tools-main simplelang lam-examples/helloworld-loop.lam
 ```
 
 猜数字小游戏
