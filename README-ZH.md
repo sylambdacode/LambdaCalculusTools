@@ -116,3 +116,9 @@ main = f a (λv1 v2. (g v1 v2 (λv3. v3)));
 可以在lam-lib与lam-examples目录下找到更多内容。
 
 lam-lib中包含一些通用Lambda函数，lam-examples中包含一些例子代码。
+
+---
+
+English: README.md
+
+中文: README-ZH.md
