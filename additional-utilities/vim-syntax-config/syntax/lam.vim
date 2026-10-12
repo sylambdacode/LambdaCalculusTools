@@ -18,18 +18,12 @@ syntax region lamComment start=/{-/ end=/-}/
 syntax region lamString start=/"/ end=/"/ skip=/\\/
 
 
-"highlight link lamSymbol1 Special
-"highlight link lamSymbol2 Special
-"highlight link lamSymbol3 Delimiter
-"highlight link lamSymbol4 Delimiter
-
 highlight lamSymbol1 cterm=bold ctermfg=blue
 highlight lamSymbol2 cterm=bold ctermfg=blue
 highlight lamSymbol3 cterm=bold ctermfg=blue
 highlight lamSymbol4 cterm=bold ctermfg=blue
 
 highlight lamIdentifier ctermfg=NONE
-"highlight link lamIdentifier Function
 
 highlight link lamKeyword Keyword
 highlight link lamComment Comment
