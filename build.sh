@@ -5,8 +5,8 @@
 
 
 
-cd additional-tools
+cd additional-utilities/binary-string-tools
 ./build.sh
-cd ..
+cd ../..
 
 cabal build
