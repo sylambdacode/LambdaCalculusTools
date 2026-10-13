@@ -36,17 +36,17 @@ krivineMachine f (Variable 1) p (ref : _) h =
                   Just v -> v
                   Nothing -> error "lookup lazy krivine machine heap error"
 
-
-krivineMachine f (Variable n) p (_ : e) h =
+krivineMachine f (Variable n) p e h =
     if n > 1
-    then krivineMachine f (Variable (n - 1)) p e h
-    else do
-        lambdaTerm <- f n
-        krivineMachine f lambdaTerm p e h
-
-krivineMachine _ (Variable _) _ [] _ = error "Environment not be empty"
+    then
+        case e of
+            (_ : e') -> krivineMachine f (Variable (n - 1)) p e' h
+            [] -> error "Environment not be empty"
+    else
+        do
+            lambdaTerm <- f n
+            krivineMachine f lambdaTerm p e h
 
 krivineMachine _ (Abstraction t) [] e h =
     return (Abstraction t, e, h)
-
 
