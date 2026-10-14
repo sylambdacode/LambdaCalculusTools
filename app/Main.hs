@@ -1,3 +1,8 @@
+{-
+Copyright (c) 2025 sylambdacode
+SPDX-License-Identifier: MIT
+-}
+
 module Main where
 
 import qualified SimpleCalculator as SimpleCalculator
