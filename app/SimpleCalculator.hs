@@ -73,7 +73,7 @@ subcommand args = do
     calculateType <- case lookup "t" argList of
         Just v -> return v
         Nothing -> return "type1"
-    printResult <- case lookup "p" argList of
+    printResult <- case lookup "r" argList of
         Just v -> return v
         Nothing -> return "enable"
 
