@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 module SimpleCalculator (subcommand) where
 
 import LambdaParser.UntypedLambdaParser
-import UntypedLambdaCalculus.LambdaTerm (LambdaTerm (Variable, Application))
+import UntypedLambdaCalculus.LambdaTerm (LambdaTerm (Variable, Application, Abstraction))
 import UntypedLambdaCalculus.LambdaReduction (calculateNormalResult, calculateWeakNormalHeadResult, isWeakNormalHeadForm)
 import CommandException
 import CommandArg
@@ -17,25 +17,37 @@ import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode))
 import Control.Exception (throw, throwIO)
 
 
-matchFunction :: LambdaTerm -> LambdaTerm
+matchFunction :: LambdaTerm -> IO LambdaTerm
 
-matchFunction (Application (Application (Variable "strict")  arg1) arg2) =
-    let arg1Value = evalLambdaTerm arg1
-    in (Application arg2 arg1Value)
+matchFunction (Application (Application (Variable "strict")  arg1) arg2) = do
+    arg1Value <- evalLambdaTerm arg1
+    return (Application arg2 arg1Value)
 
-matchFunction (Application (Application (Variable "strict-normal")  arg1) arg2) =
+matchFunction (Application (Application (Variable "strict-normal")  arg1) arg2) = do
     let arg1NormalResult = calculateNormalResult arg1
-    in (Application arg2 arg1NormalResult)
+    return (Application arg2 arg1NormalResult)
 
-matchFunction lambdaTerm = lambdaTerm
+matchFunction (Application (Variable "_print-bool")  arg1) = do
+    arg1Value <- evalLambdaTerm arg1
+    let arg1BoolValue = case arg1Value of
+            Abstraction x (Abstraction y (Variable v)) -> if v == x || v == y then x == v else error "not bool"
+            _ -> error "not bool"
+    putStrLn (if arg1BoolValue then "true" else "false")
+    return arg1
+
+matchFunction (Application (Variable "_print-lambda-term")  arg1) = do
+    print arg1
+    return arg1
+
+matchFunction lambdaTerm = return lambdaTerm
 
 
-evalLambdaTerm :: LambdaTerm -> LambdaTerm
+evalLambdaTerm :: LambdaTerm -> IO LambdaTerm
 
-evalLambdaTerm lambdaTerm =
-    let result = matchFunction (calculateWeakNormalHeadResult lambdaTerm)
-    in if isWeakNormalHeadForm result
-           then result
+evalLambdaTerm lambdaTerm = do
+    result <- matchFunction (calculateWeakNormalHeadResult lambdaTerm)
+    if isWeakNormalHeadForm result
+           then return result
            else evalLambdaTerm result
 
 
@@ -61,6 +73,9 @@ subcommand args = do
     calculateType <- case lookup "t" argList of
         Just v -> return v
         Nothing -> return "type1"
+    printResult <- case lookup "p" argList of
+        Just v -> return v
+        Nothing -> return "enable"
 
     let codeFiles = map (\(_, value) -> value) (filter (\(name, _) -> (name == "")) argList)
     valDefList <- parseCodeFiles codeFiles
@@ -68,10 +83,12 @@ subcommand args = do
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm Set.empty valDefMap v
         Nothing -> throwIO $ CommandException ("not found " ++ functionName)
-    let result = case calculateType of
-                     "type1" -> calculateNormalResult lambdaTerm
-                     "type2" -> evalLambdaTerm lambdaTerm
-                     unknownType -> throw $ CommandException ("unknown calculate type: " ++ unknownType)
-    print result
-
+    case calculateType of
+        "type1" -> do
+            let result = calculateNormalResult lambdaTerm
+            if printResult == "enable" then print result else return ()
+        "type2" -> do
+            result <- evalLambdaTerm lambdaTerm
+            if printResult == "enable" then print result else return ()
+        unknownType -> throw $ CommandException ("unknown calculate type: " ++ unknownType)
 
