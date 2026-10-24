@@ -62,7 +62,8 @@ executable lambda-calculus-tools-main
         SimpleKrivineMachineRunner,
         CommandException,
         CommandArg,
-        SimpleLangException
+        SimpleLangException,
+        SimpleCalculatorException
 
     build-depends:
         base,

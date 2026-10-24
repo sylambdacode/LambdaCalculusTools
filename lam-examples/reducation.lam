@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT
 
 main1 = f;
 main2 = cps {
-    r <- strict-normal f;
+    r <- _strict-normal f;
     r
 };
 f = g x;

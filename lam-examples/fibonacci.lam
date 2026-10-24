@@ -24,7 +24,7 @@ require lam-lib
 -}
 
 main2 = cps {
-    r <- strict (fibonacci-cps' N-5 id);
+    r <- _strict (fibonacci-cps' N-5 id);
     r
 };
 
@@ -64,21 +64,21 @@ fibonacci-cps = Y λself n cont. cps {
 };
 
 fibonacci-cps' = Y λself n cont. cps {
-    n-eq-1 <- strict-normal (bits-eq-cps n N-1 id);
-    r <- strict (if-then-else n-eq-1
+    n-eq-1 <- _strict-normal (bits-eq-cps n N-1 id);
+    r <- _strict (if-then-else n-eq-1
         (cont N-1)
         (cps {
             n-eq-2 <- (bits-eq-cps n N-2);
             if-then-else n-eq-2
                 (cont N-2)
                 (cps {
-                     n-sub-1 <- strict-normal (bits-sub-cps n N-1 id);
-                     n-sub-2 <- strict-normal (bits-sub-cps n N-2 id);
-                     r1 <- strict (self n-sub-1 id);
-                     r2 <- strict (self n-sub-2 id);
-                     r1-add-r2 <- strict (bits-add-cps r1 r2 id);
+                     n-sub-1 <- _strict-normal (bits-sub-cps n N-1 id);
+                     n-sub-2 <- _strict-normal (bits-sub-cps n N-2 id);
+                     r1 <- _strict (self n-sub-1 id);
+                     r2 <- _strict (self n-sub-2 id);
+                     r1-add-r2 <- _strict (bits-add-cps r1 r2 id);
                      cont r1-add-r2
                  })
          }));
-    strict-normal r id
+    _strict-normal r id
 };
