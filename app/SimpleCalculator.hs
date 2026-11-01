@@ -143,6 +143,20 @@ matchFunction (Application (Application (Variable "_int-div") arg1) arg2) = do
     let arg2val = fromSimpleValueInt arg2SimpleValueValue
     return $ toSimpleValueInt (arg1val `div` arg2val)
 
+matchFunction (Application (Application (Variable "_int-mod") arg1) arg2) = do
+    arg1SimpleValueValue <- evalLambdaTerm arg1
+    arg2SimpleValueValue <- evalLambdaTerm arg2
+    let arg1val = fromSimpleValueInt arg1SimpleValueValue
+    let arg2val = fromSimpleValueInt arg2SimpleValueValue
+    return $ toSimpleValueInt (arg1val `mod` arg2val)
+
+matchFunction (Application (Application (Variable "_int-rem") arg1) arg2) = do
+    arg1SimpleValueValue <- evalLambdaTerm arg1
+    arg2SimpleValueValue <- evalLambdaTerm arg2
+    let arg1val = fromSimpleValueInt arg1SimpleValueValue
+    let arg2val = fromSimpleValueInt arg2SimpleValueValue
+    return $ toSimpleValueInt (arg1val `rem` arg2val)
+
 matchFunction (Application (Application (Variable "_eq") arg1) arg2) = do
     arg1val <- evalLambdaTerm arg1
     arg2val <- evalLambdaTerm arg2
