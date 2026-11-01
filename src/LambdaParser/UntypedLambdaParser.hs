@@ -24,7 +24,7 @@ instance Show Expr where
         where show' [] = ""
               show' [e] = show e
               show' (e : es) = show e ++ " " ++ show' es
-    show (Lam names expr) = "\\" ++ show names ++ "." ++ show expr
+    show (Lam names expr) = "^" ++ show names ++ "." ++ show expr
     show (Cps items finalExprs) = "do" ++ " " ++ show items ++ " > " ++ show finalExprs
     show (Let valDef expr) = "let " ++ show valDef ++ " in " ++ show expr
 
