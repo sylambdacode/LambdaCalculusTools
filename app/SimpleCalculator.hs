@@ -14,8 +14,9 @@ import SimpleCalculatorException
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode))
-import Control.Exception (throw, throwIO)
+import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode), hPutStr, isEOF, stderr)
+import System.IO.Error (isEOFError)
+import Control.Exception (throw, throwIO, try)
 import Data.Char (chr, ord)
 
 
@@ -53,16 +54,8 @@ matchFunction (Application (Application (Variable "_strict-normal") arg1) arg2) 
     let arg1NormalResult = calculateNormalResult arg1
     return (Application arg2 arg1NormalResult)
 
-matchFunction (Application (Variable "_print-bool") arg1) = do
-    arg1Value <- evalLambdaTerm arg1
-    let arg1BoolValue = case arg1Value of
-            Abstraction x (Abstraction y (Variable v)) -> if v == x || v == y then x == v else error "not bool"
-            _ -> error "not bool"
-    putStrLn (if arg1BoolValue then "true" else "false")
-    return arg1
-
-matchFunction (Application (Variable "_print-lambda-term") arg1) = do
-    print arg1
+matchFunction (Application (Variable "_output-lambda-term") arg1) = do
+    putStr (show arg1)
     return arg1
 
 matchFunction (Application (Application (Variable "_string-concat")  arg1) arg2) = do
@@ -70,10 +63,26 @@ matchFunction (Application (Application (Variable "_string-concat")  arg1) arg2)
     arg2val <- evalLambdaTerm arg2
     return (toSimpleValueString (fromSimpleValueString arg1val ++ fromSimpleValueString arg2val))
 
-matchFunction (Application (Variable "_print") arg1) = do
+matchFunction (Application (Variable "_output-string") arg1) = do
     arg1val <- evalLambdaTerm arg1
     putStr (fromSimpleValueString arg1val)
     return arg1
+
+matchFunction (Application (Variable "_output-error-string") arg1) = do
+    arg1val <- evalLambdaTerm arg1
+    hPutStr stderr (fromSimpleValueString arg1val)
+    return arg1
+
+matchFunction Variable "_input-line") = do
+    lineEither <- try getLine
+    line <- case lineEither of
+        Right v -> return v
+        Left e -> if isEOFError (e :: IOError) then return "" else throw e
+    return (toSimpleValueString line)
+
+matchFunction Variable "_input-is-eof") = do
+    resultVal <- isEOF
+    return (toSimpleValueBool resultVal)
 
 matchFunction (Application (Variable "_int-to-string") arg1) = do
     arg1val <- evalLambdaTerm arg1
