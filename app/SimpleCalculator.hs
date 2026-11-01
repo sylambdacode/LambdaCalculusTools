@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 module SimpleCalculator (subcommand) where
 
 import LambdaParser.UntypedLambdaParser
-import UntypedLambdaCalculus.LambdaTerm (LambdaTerm (Variable, Application, Abstraction), alphaEq)
+import UntypedLambdaCalculus.LambdaTerm (LambdaTerm (Variable, Application), alphaEq)
 import UntypedLambdaCalculus.LambdaReduction (calculateNormalResult, calculateWeakNormalHeadResult, isWeakNormalHeadForm)
 import CommandException
 import CommandArg
@@ -73,14 +73,14 @@ matchFunction (Application (Variable "_output-error-string") arg1) = do
     hPutStr stderr (fromSimpleValueString arg1val)
     return arg1
 
-matchFunction Variable "_input-line") = do
+matchFunction (Variable "_input-line") = do
     lineEither <- try getLine
     line <- case lineEither of
         Right v -> return v
         Left e -> if isEOFError (e :: IOError) then return "" else throw e
     return (toSimpleValueString line)
 
-matchFunction Variable "_input-is-eof") = do
+matchFunction (Variable "_input-is-eof") = do
     resultVal <- isEOF
     return (toSimpleValueBool resultVal)
 
