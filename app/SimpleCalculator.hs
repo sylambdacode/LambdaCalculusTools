@@ -18,6 +18,7 @@ import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode), 
 import System.IO.Error (isEOFError)
 import Control.Exception (throw, throwIO, try)
 import Data.Char (chr, ord)
+import Data.List (tails, findIndex, isPrefixOf)
 
 
 toSimpleValueString :: String -> LambdaTerm
@@ -63,6 +64,16 @@ matchFunction (Application (Application (Variable "_string-concat")  arg1) arg2)
     arg2val <- evalLambdaTerm arg2
     return (toSimpleValueString (fromSimpleValueString arg1val ++ fromSimpleValueString arg2val))
 
+matchFunction (Application (Application (Variable "_string-find") arg1) arg2) = do
+    arg1SimpleValueValue <- evalLambdaTerm arg1
+    arg2SimpleValueValue <- evalLambdaTerm arg2
+    let arg1val = fromSimpleValueString arg1SimpleValueValue
+    let arg2val = fromSimpleValueString arg2SimpleValueValue
+    resultIndex <- case findIndex (isPrefixOf arg2val) (tails arg1val) of
+            Just v -> return v
+            Nothing -> return (-1)
+    return (toSimpleValueInt (toInteger resultIndex))
+
 matchFunction (Application (Variable "_output-string") arg1) = do
     arg1val <- evalLambdaTerm arg1
     putStr (fromSimpleValueString arg1val)
@@ -88,7 +99,6 @@ matchFunction (Application (Variable "_int-to-string") arg1) = do
     arg1val <- evalLambdaTerm arg1
     let arg1IntegerVal = fromSimpleValueInt arg1val
     return (toSimpleValueString (show arg1IntegerVal))
-
 
 matchFunction (Application (Variable "_string-to-int") arg1) = do
     arg1val <- evalLambdaTerm arg1
