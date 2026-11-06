@@ -54,9 +54,9 @@ matchFunction (Application (Application (Variable "_strict-normal") arg1) arg2) 
     let arg1NormalResult = calculateNormalResult arg1
     return (Application arg2 arg1NormalResult)
 
-matchFunction (Application (Variable "_output-lambda-term") arg1) = do
-    putStr (show arg1)
-    return arg1
+matchFunction (Application (Variable "_lambda-term-to-string") arg1) = do
+    let returnValue = show arg1
+    return (toSimpleValueString returnValue)
 
 matchFunction (Application (Application (Variable "_string-concat")  arg1) arg2) = do
     arg1val <- evalLambdaTerm arg1
