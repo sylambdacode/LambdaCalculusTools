@@ -111,14 +111,19 @@ showLambdaTerm (DependentProduct variableName variableType lambdaTerm) =
 showLambdaTerm (Application functionLambdaTerm argumentLambdaTerm) =
     "(" ++ show functionLambdaTerm ++ " " ++ show argumentLambdaTerm ++ ")"
 
-instance Read LambdaCubeTerm where
-    readsPrec _ = (\v -> [((readLambdaTerm v), "")])
 
-readLambdaTerm :: String -> LambdaCubeTerm
+instance Read LambdaCubeTerm where
+    readsPrec _ = (\v ->
+                        case readLambdaTerm v of
+                            Right r -> [(r, "")]
+                            Left l -> error l)
+
+readLambdaTerm :: String -> Either String LambdaCubeTerm
 readLambdaTerm lambdaTermString =
     case parseLambdaTerm lambdaTermString of
-        (Just lambdaTerm, _) -> lambdaTerm
-        (Nothing, _) -> error "parse LambdaCubeTerm String error"
+        (Just lambdaTerm, _) -> Right lambdaTerm
+        (Nothing, _) -> Left "parse LambdaCubeTerm String error"
+
 
 parseVariableName :: String -> Bool -> (Maybe String, String)
 parseVariableName [] _ = (Nothing, [])

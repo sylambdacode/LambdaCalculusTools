@@ -13,6 +13,7 @@ import qualified Data.Map as Map
 
 data LambdaTerm = Variable String | Abstraction String LambdaTerm | Application LambdaTerm LambdaTerm
 
+
 fvSet :: LambdaTerm -> Set String
 fvSet (Variable name) = Set.singleton name
 
@@ -83,13 +84,16 @@ showLambdaTerm (Application functionLambdaTerm argumentLambdaTerm) =
     "(" ++ show functionLambdaTerm ++ " " ++ show argumentLambdaTerm ++ ")"
 
 instance Read LambdaTerm where
-    readsPrec _ = (\v -> [((readLambdaTerm v), "")])
+    readsPrec _ = (\v ->
+                        case readLambdaTerm v of
+                            Right r -> [(r, "")]
+                            Left l -> error l)
 
-readLambdaTerm :: String -> LambdaTerm
+readLambdaTerm :: String -> Either String LambdaTerm
 readLambdaTerm lambdaTermString =
     case parseLambdaTerm lambdaTermString of
-        (Just lambdaTerm, _) -> lambdaTerm
-        (Nothing, _) -> error "parse LambdaTerm String error"
+        (Just lambdaTerm, _) -> Right lambdaTerm
+        (Nothing, _) -> Left "parse LambdaTerm String error"
 
 parseVariableName :: String -> Bool -> (Maybe String, String)
 parseVariableName [] _ = (Nothing, [])
