@@ -301,7 +301,7 @@ subcommand args = do
     lambdaTerm <- case Map.lookup functionName valDefMap of
         Just v -> return $ toLambdaTerm Set.empty valDefMap v
         Nothing -> throwIO $ CommandException ("not found " ++ functionName)
-    result <- try (runStateT (evalExpr (readLambdaTerm (show lambdaTerm))) (ObjectState 0 Map.empty))
+    result <- try (runStateT (evalExpr lambdaTerm) (ObjectState 0 Map.empty))
     case result of
         Left e -> throwIO (CommandException ("SimpleLang runtime error: " ++ show (e :: SimpleLangException)))
         Right _ -> return ()
