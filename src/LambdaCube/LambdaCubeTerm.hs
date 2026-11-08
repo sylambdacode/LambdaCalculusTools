@@ -95,6 +95,7 @@ alphaEq _ _ _ = False
 instance Show LambdaCubeTerm where
     show lambdaTerm = showLambdaTerm lambdaTerm
 
+
 showVariableName :: String -> String
 showVariableName [] = []
 showVariableName (c : xs) =
@@ -118,10 +119,12 @@ instance Read LambdaCubeTerm where
                             Right r -> [(r, "")]
                             Left l -> error l)
 
+
 readLambdaTerm :: String -> Either String LambdaCubeTerm
 readLambdaTerm lambdaTermString =
     case parseLambdaTerm lambdaTermString of
-        (Just lambdaTerm, _) -> Right lambdaTerm
+        (Just lambdaTerm, "") -> Right lambdaTerm
+        (Just _, _) -> Left "parse LambdaCubeTerm String error"
         (Nothing, _) -> Left "parse LambdaCubeTerm String error"
 
 

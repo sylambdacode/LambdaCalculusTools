@@ -66,8 +66,10 @@ alphaEq variableNameMap (Application functionLambdaTerm1 argumentLambdaTerm1) (A
 
 alphaEq _ _ _ = False
 
+
 instance Show LambdaTerm where
     show lambdaTerm = showLambdaTerm lambdaTerm
+
 
 showVariableName :: String -> String
 showVariableName [] = []
@@ -83,16 +85,19 @@ showLambdaTerm (Abstraction variableName lambdaTerm) =
 showLambdaTerm (Application functionLambdaTerm argumentLambdaTerm) =
     "(" ++ show functionLambdaTerm ++ " " ++ show argumentLambdaTerm ++ ")"
 
+
 instance Read LambdaTerm where
     readsPrec _ = (\v ->
                         case readLambdaTerm v of
                             Right r -> [(r, "")]
                             Left l -> error l)
 
+
 readLambdaTerm :: String -> Either String LambdaTerm
 readLambdaTerm lambdaTermString =
     case parseLambdaTerm lambdaTermString of
-        (Just lambdaTerm, _) -> Right lambdaTerm
+        (Just lambdaTerm, "") -> Right lambdaTerm
+        (Just _, _) -> Left "parse LambdaTerm String error"
         (Nothing, _) -> Left "parse LambdaTerm String error"
 
 parseVariableName :: String -> Bool -> (Maybe String, String)
