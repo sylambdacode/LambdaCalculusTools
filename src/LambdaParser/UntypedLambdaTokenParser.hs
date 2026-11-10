@@ -52,8 +52,8 @@ matchTokenType _ _ = False
 
 
 
-parseEscapeChar :: UntypedLambdaTokenParser Char
-parseEscapeChar = do
+parseStringEscapeChar :: UntypedLambdaTokenParser Char
+parseStringEscapeChar = do
     _ <- try (char '\\')
     c <- oneOf "\\\"ntvrx" <?> "escape char(\\, \", n, t, v, r, x)"
     case c of
@@ -72,7 +72,7 @@ parseEscapeChar = do
 
 parseString :: UntypedLambdaTokenParser String
 parseString = char '\"' *> parseString'
-    where anyCharNotStringEnding = parseEscapeChar <|> try (noneOf "\"") <?> "any char not \""
+    where anyCharNotStringEnding = parseStringEscapeChar <|> try (noneOf "\"") <?> "any char not \""
           parseString' = do
               v <- many anyCharNotStringEnding
               _ <- char '\"' <?> "ending string"
@@ -94,7 +94,9 @@ skipWhiteCharAndComment = (skipWhiteChar *> many (skipComment *> skipWhiteChar) 
 
 
 parseKeywordOrName :: UntypedLambdaTokenParser String
-parseKeywordOrName = (skipWhiteCharAndComment *> many1 (noneOf "λ^.(){}=;< \"\n\r\t")) <?> "keyword or name"
+parseKeywordOrName = (skipWhiteCharAndComment *> many1 (try parseKeywordOrNameChar <|> parseKeywordOrNameEscapeChar)) <?> "keyword or name"
+    where parseKeywordOrNameChar = noneOf "λ^.(){}=;< \"\n\r\t\\"
+          parseKeywordOrNameEscapeChar = try (char '\\') *> (oneOf "λ^.(){}=;< \"\n\r\t\\" <?> "escape char")
 
 parseToken :: UntypedLambdaTokenParser Token
 parseToken = do
