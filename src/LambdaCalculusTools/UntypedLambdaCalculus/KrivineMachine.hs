@@ -3,9 +3,9 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module UntypedLambdaCalculus.KrivineMachine where
+module LambdaCalculusTools.UntypedLambdaCalculus.KrivineMachine where
 
-import UntypedLambdaCalculus.DeBruijnLambdaTerm
+import LambdaCalculusTools.UntypedLambdaCalculus.DeBruijnLambdaTerm
 
 newtype Environment = Environment [(DeBruijnLambdaTerm, Environment)] deriving Show
 

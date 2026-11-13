@@ -3,7 +3,7 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module LambdaParser.UntypedLambdaTokenParser where
+module LambdaCalculusTools.LambdaParser.UntypedLambdaTokenParser where
 
 import Text.Parsec.Prim
 import Text.Parsec.Combinator

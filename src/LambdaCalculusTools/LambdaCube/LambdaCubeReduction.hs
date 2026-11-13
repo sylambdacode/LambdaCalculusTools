@@ -3,9 +3,9 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module LambdaCube.LambdaCubeReduction where
+module LambdaCalculusTools.LambdaCube.LambdaCubeReduction where
 
-import LambdaCube.LambdaCubeTerm
+import LambdaCalculusTools.LambdaCube.LambdaCubeTerm
 
 
 normalOrderBetaReduce :: LambdaCubeTerm -> LambdaCubeTerm

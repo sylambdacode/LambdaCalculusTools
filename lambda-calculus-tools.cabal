@@ -26,19 +26,19 @@ library
     import:           warnings
 
     exposed-modules:
-        UntypedLambdaCalculus.LambdaTerm,
-        UntypedLambdaCalculus.DeBruijnLambdaTerm,
-        SimpleTypedLambdaCalculus.SimpleType,
-        SimpleTypedLambdaCalculus.SimpleTypedLambdaTerm,
-        LambdaCube.LambdaCubeTerm,
-        UntypedLambdaCalculus.LambdaReduction,
-        LambdaCube.LambdaCubeReduction,
-        LambdaCube.LambdaCubeType,
-        UntypedLambdaCalculus.LambdaTermTools,
-        UntypedLambdaCalculus.KrivineMachine,
-        UntypedLambdaCalculus.LazyKrivineMachine,
-        LambdaParser.UntypedLambdaTokenParser,
-        LambdaParser.UntypedLambdaParser
+        LambdaCalculusTools.UntypedLambdaCalculus.LambdaTerm,
+        LambdaCalculusTools.UntypedLambdaCalculus.DeBruijnLambdaTerm,
+        LambdaCalculusTools.SimpleTypedLambdaCalculus.SimpleType,
+        LambdaCalculusTools.SimpleTypedLambdaCalculus.SimpleTypedLambdaTerm,
+        LambdaCalculusTools.LambdaCube.LambdaCubeTerm,
+        LambdaCalculusTools.UntypedLambdaCalculus.LambdaReduction,
+        LambdaCalculusTools.LambdaCube.LambdaCubeReduction,
+        LambdaCalculusTools.LambdaCube.LambdaCubeType,
+        LambdaCalculusTools.UntypedLambdaCalculus.LambdaTermTools,
+        LambdaCalculusTools.UntypedLambdaCalculus.KrivineMachine,
+        LambdaCalculusTools.UntypedLambdaCalculus.LazyKrivineMachine,
+        LambdaCalculusTools.LambdaParser.UntypedLambdaTokenParser,
+        LambdaCalculusTools.LambdaParser.UntypedLambdaParser
 
     build-depends:
         base,
@@ -57,13 +57,13 @@ executable lambda-calculus-tools-main
     main-is:          Main.hs
 
     other-modules:
-        SimpleCalculator,
-        SimpleLang,
-        SimpleKrivineMachineRunner,
-        CommandException,
-        CommandArg,
-        SimpleLangException,
-        SimpleCalculatorException
+        LambdaCalculusTools.CommandLineInterface.SimpleCalculator,
+        LambdaCalculusTools.CommandLineInterface.SimpleLang,
+        LambdaCalculusTools.CommandLineInterface.SimpleKrivineMachineRunner,
+        LambdaCalculusTools.CommandLineInterface.CommandException,
+        LambdaCalculusTools.CommandLineInterface.CommandArg,
+        LambdaCalculusTools.CommandLineInterface.SimpleLangException,
+        LambdaCalculusTools.CommandLineInterface.SimpleCalculatorException
 
     build-depends:
         base,

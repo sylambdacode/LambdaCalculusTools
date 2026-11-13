@@ -3,9 +3,9 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module SimpleTypedLambdaCalculus.SimpleTypedLambdaTerm where
+module LambdaCalculusTools.SimpleTypedLambdaCalculus.SimpleTypedLambdaTerm where
 
-import SimpleTypedLambdaCalculus.SimpleType
+import LambdaCalculusTools.SimpleTypedLambdaCalculus.SimpleType
 
 import Data.Map (Map)
 import qualified Data.Map as Map

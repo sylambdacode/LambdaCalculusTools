@@ -3,7 +3,7 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module UntypedLambdaCalculus.LambdaTerm where
+module LambdaCalculusTools.UntypedLambdaCalculus.LambdaTerm where
 
 import Data.Set (Set)
 import qualified Data.Set as Set

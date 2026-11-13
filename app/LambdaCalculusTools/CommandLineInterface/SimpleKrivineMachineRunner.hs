@@ -3,16 +3,16 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module SimpleKrivineMachineRunner (subcommand) where
+module LambdaCalculusTools.CommandLineInterface.SimpleKrivineMachineRunner (subcommand) where
 
-import UntypedLambdaCalculus.DeBruijnLambdaTerm(DeBruijnLambdaTerm)
-import qualified UntypedLambdaCalculus.DeBruijnLambdaTerm as DeBruijnLambdaTerm
-import LambdaParser.UntypedLambdaParser
-import UntypedLambdaCalculus.KrivineMachine
-import UntypedLambdaCalculus.LambdaTermTools
+import LambdaCalculusTools.UntypedLambdaCalculus.DeBruijnLambdaTerm(DeBruijnLambdaTerm)
+import qualified LambdaCalculusTools.UntypedLambdaCalculus.DeBruijnLambdaTerm as DeBruijnLambdaTerm
+import LambdaCalculusTools.LambdaParser.UntypedLambdaParser
+import LambdaCalculusTools.UntypedLambdaCalculus.KrivineMachine
+import LambdaCalculusTools.UntypedLambdaCalculus.LambdaTermTools
 
-import CommandException
-import CommandArg
+import LambdaCalculusTools.CommandLineInterface.CommandException
+import LambdaCalculusTools.CommandLineInterface.CommandArg
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set

@@ -3,10 +3,10 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module LambdaParser.UntypedLambdaParser where
+module LambdaCalculusTools.LambdaParser.UntypedLambdaParser where
 
-import UntypedLambdaCalculus.LambdaTerm
-import LambdaParser.UntypedLambdaTokenParser
+import LambdaCalculusTools.UntypedLambdaCalculus.LambdaTerm
+import LambdaCalculusTools.LambdaParser.UntypedLambdaTokenParser
 
 import Text.Parsec.Prim
 import Text.Parsec (SourceName, ParseError)

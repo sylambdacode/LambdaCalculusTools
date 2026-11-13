@@ -3,7 +3,7 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module SimpleLangException where
+module LambdaCalculusTools.CommandLineInterface.SimpleLangException where
 
 import Control.Exception (Exception)
 

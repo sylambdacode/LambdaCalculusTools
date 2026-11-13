@@ -3,7 +3,7 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module CommandArg where
+module LambdaCalculusTools.CommandLineInterface.CommandArg where
 
 parseArgs :: [String] -> [(String, String)]
 parseArgs [] = []

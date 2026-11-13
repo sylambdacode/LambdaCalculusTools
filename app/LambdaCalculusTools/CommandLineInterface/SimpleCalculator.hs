@@ -3,14 +3,14 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module SimpleCalculator (subcommand) where
+module LambdaCalculusTools.CommandLineInterface.SimpleCalculator (subcommand) where
 
-import LambdaParser.UntypedLambdaParser
-import UntypedLambdaCalculus.LambdaTerm (LambdaTerm (Variable, Application), alphaEq)
-import UntypedLambdaCalculus.LambdaReduction (calculateNormalResult, calculateWeakNormalHeadResult, isWeakNormalHeadForm)
-import CommandException
-import CommandArg
-import SimpleCalculatorException
+import LambdaCalculusTools.LambdaParser.UntypedLambdaParser
+import LambdaCalculusTools.UntypedLambdaCalculus.LambdaTerm (LambdaTerm (Variable, Application), alphaEq)
+import LambdaCalculusTools.UntypedLambdaCalculus.LambdaReduction (calculateNormalResult, calculateWeakNormalHeadResult, isWeakNormalHeadForm)
+import LambdaCalculusTools.CommandLineInterface.CommandException
+import LambdaCalculusTools.CommandLineInterface.CommandArg
+import LambdaCalculusTools.CommandLineInterface.SimpleCalculatorException
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set

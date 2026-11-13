@@ -3,10 +3,10 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module LambdaCube.LambdaCubeType where
+module LambdaCalculusTools.LambdaCube.LambdaCubeType where
 
-import LambdaCube.LambdaCubeTerm
-import LambdaCube.LambdaCubeReduction
+import LambdaCalculusTools.LambdaCube.LambdaCubeTerm
+import LambdaCalculusTools.LambdaCube.LambdaCubeReduction
 
 import Data.Map(Map)
 import qualified Data.Map as Map

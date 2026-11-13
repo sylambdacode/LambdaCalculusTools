@@ -3,9 +3,9 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module UntypedLambdaCalculus.LazyKrivineMachine where
+module LambdaCalculusTools.UntypedLambdaCalculus.LazyKrivineMachine where
 
-import UntypedLambdaCalculus.DeBruijnLambdaTerm
+import LambdaCalculusTools.UntypedLambdaCalculus.DeBruijnLambdaTerm
 
 import Data.Map (Map)
 import qualified Data.Map as Map

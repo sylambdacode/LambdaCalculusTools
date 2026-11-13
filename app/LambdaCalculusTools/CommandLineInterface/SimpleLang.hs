@@ -3,14 +3,14 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module SimpleLang (subcommand) where
+module LambdaCalculusTools.CommandLineInterface.SimpleLang (subcommand) where
 
-import UntypedLambdaCalculus.LambdaTerm
-import LambdaParser.UntypedLambdaParser
-import UntypedLambdaCalculus.LambdaReduction (calculateWeakNormalHeadResult)
-import CommandException
-import CommandArg
-import SimpleLangException
+import LambdaCalculusTools.UntypedLambdaCalculus.LambdaTerm
+import LambdaCalculusTools.LambdaParser.UntypedLambdaParser
+import LambdaCalculusTools.UntypedLambdaCalculus.LambdaReduction (calculateWeakNormalHeadResult)
+import LambdaCalculusTools.CommandLineInterface.CommandException
+import LambdaCalculusTools.CommandLineInterface.CommandArg
+import LambdaCalculusTools.CommandLineInterface.SimpleLangException
 
 import Data.Map (Map)
 import qualified Data.Map as Map

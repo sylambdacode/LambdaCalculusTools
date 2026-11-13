@@ -3,12 +3,12 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module UntypedLambdaCalculus.LambdaTermTools where
+module LambdaCalculusTools.UntypedLambdaCalculus.LambdaTermTools where
 
-import UntypedLambdaCalculus.LambdaTerm(LambdaTerm)
-import qualified UntypedLambdaCalculus.LambdaTerm as LambdaTerm
-import UntypedLambdaCalculus.DeBruijnLambdaTerm(DeBruijnLambdaTerm)
-import qualified UntypedLambdaCalculus.DeBruijnLambdaTerm as DeBruijnLambdaTerm
+import LambdaCalculusTools.UntypedLambdaCalculus.LambdaTerm(LambdaTerm)
+import qualified LambdaCalculusTools.UntypedLambdaCalculus.LambdaTerm as LambdaTerm
+import LambdaCalculusTools.UntypedLambdaCalculus.DeBruijnLambdaTerm(DeBruijnLambdaTerm)
+import qualified LambdaCalculusTools.UntypedLambdaCalculus.DeBruijnLambdaTerm as DeBruijnLambdaTerm
 
 import Data.Map (Map)
 import qualified Data.Map as Map

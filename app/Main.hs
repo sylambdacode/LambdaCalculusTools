@@ -5,10 +5,10 @@ SPDX-License-Identifier: MIT
 
 module Main where
 
-import qualified SimpleCalculator as SimpleCalculator
-import qualified SimpleLang as SimpleLang
-import qualified SimpleKrivineMachineRunner as SimpleKrivineMachineRunner
-import CommandException
+import qualified LambdaCalculusTools.CommandLineInterface.SimpleCalculator as SimpleCalculator
+import qualified LambdaCalculusTools.CommandLineInterface.SimpleLang as SimpleLang
+import qualified LambdaCalculusTools.CommandLineInterface.SimpleKrivineMachineRunner as SimpleKrivineMachineRunner
+import LambdaCalculusTools.CommandLineInterface.CommandException
 
 import System.Environment(getArgs)
 import Control.Exception (throw, try)
