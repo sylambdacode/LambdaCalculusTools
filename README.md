@@ -8,7 +8,6 @@ This project is focused on the implementation of a suite of tools for Lambda Cal
 - Support for type checking of Lambda Cube expressions, with support for custom rules
 - Krivine Machine and Lazy Krivine Machine
 - A text parser for Lambda terms supporting extended syntax
-- A simple programming language (doesn't support garbage collection)
 
 ## The basic usage
 
@@ -30,20 +29,6 @@ Run Krivine Machine:
 
 ```
 lambda-calculus-tools-main runKrivineMachine lam-examples/hello-world.lam lam-lib/*.lam
-```
-
-Run a simple programming language through the implementation of extended lambda calculus:
-
-Looping to print Hello World:
-
-```
-lambda-calculus-tools-main simplelang lam-examples/helloworld-loop.lam
-```
-
-Guess the Number Game:
-
-```
-lambda-calculus-tools-main simplelang lam-examples/what-the-number-is.lam
 ```
 
 ## A text parser for Lambda terms

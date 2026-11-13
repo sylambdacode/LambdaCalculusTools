@@ -3,7 +3,7 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module LambdaCalculusTools.CommandLineInterface.SimpleKrivineMachineRunner (subcommand) where
+module LambdaCalculusTools.CommandLineInterface.SimpleKrivineMachineRunnerSubcommand (subcommand) where
 
 import LambdaCalculusTools.UntypedLambdaCalculus.DeBruijnLambdaTerm(DeBruijnLambdaTerm)
 import qualified LambdaCalculusTools.UntypedLambdaCalculus.DeBruijnLambdaTerm as DeBruijnLambdaTerm

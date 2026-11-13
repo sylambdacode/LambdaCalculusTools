@@ -38,7 +38,9 @@ library
         LambdaCalculusTools.UntypedLambdaCalculus.KrivineMachine,
         LambdaCalculusTools.UntypedLambdaCalculus.LazyKrivineMachine,
         LambdaCalculusTools.LambdaParser.UntypedLambdaTokenParser,
-        LambdaCalculusTools.LambdaParser.UntypedLambdaParser
+        LambdaCalculusTools.LambdaParser.UntypedLambdaParser,
+        LambdaCalculusTools.LambdaExtension.LambdaExtensionCalculatorException,
+        LambdaCalculusTools.LambdaExtension.LambdaExtensionCalculator
 
     build-depends:
         base,
@@ -57,13 +59,10 @@ executable lambda-calculus-tools-main
     main-is:          Main.hs
 
     other-modules:
-        LambdaCalculusTools.CommandLineInterface.SimpleCalculator,
-        LambdaCalculusTools.CommandLineInterface.SimpleLang,
-        LambdaCalculusTools.CommandLineInterface.SimpleKrivineMachineRunner,
+        LambdaCalculusTools.CommandLineInterface.SimpleCalculatorSubcommand,
+        LambdaCalculusTools.CommandLineInterface.SimpleKrivineMachineRunnerSubcommand,
         LambdaCalculusTools.CommandLineInterface.CommandException,
         LambdaCalculusTools.CommandLineInterface.CommandArg,
-        LambdaCalculusTools.CommandLineInterface.SimpleLangException,
-        LambdaCalculusTools.CommandLineInterface.SimpleCalculatorException
 
     build-depends:
         base,

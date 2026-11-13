@@ -3,20 +3,16 @@ Copyright (c) 2025 sylambdacode
 SPDX-License-Identifier: MIT
 -}
 
-module LambdaCalculusTools.CommandLineInterface.SimpleCalculator (subcommand) where
+module LambdaCalculusTools.LambdaExtension.LambdaExtensionCalculator where
 
-import LambdaCalculusTools.LambdaParser.UntypedLambdaParser
 import LambdaCalculusTools.UntypedLambdaCalculus.LambdaTerm (LambdaTerm (Variable, Application), alphaEq)
 import LambdaCalculusTools.UntypedLambdaCalculus.LambdaReduction (calculateNormalResult, calculateWeakNormalHeadResult, isWeakNormalHeadForm)
-import LambdaCalculusTools.CommandLineInterface.CommandException
-import LambdaCalculusTools.CommandLineInterface.CommandArg
-import LambdaCalculusTools.CommandLineInterface.SimpleCalculatorException
+import LambdaCalculusTools.LambdaExtension.LambdaExtensionCalculatorException
 
 import qualified Data.Map as Map
-import qualified Data.Set as Set
-import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode), hPutStr, isEOF, stderr)
+import System.IO (hPutStr, isEOF, stderr)
 import System.IO.Error (isEOFError)
-import Control.Exception (throw, throwIO, try)
+import Control.Exception (throw, try)
 import Data.Char (chr, ord)
 import Data.List (tails, findIndex, isPrefixOf)
 
@@ -26,14 +22,14 @@ toSimpleValueString str = Variable ('\'' : str)
 
 fromSimpleValueString :: LambdaTerm -> String
 fromSimpleValueString (Variable ('\'' : str)) = str
-fromSimpleValueString lambdaTerm = throw (SimpleCalculatorException ("not string: " ++ show lambdaTerm))
+fromSimpleValueString lambdaTerm = throw (LambdaExtensionCalculatorException ("not string: " ++ show lambdaTerm))
 
 toSimpleValueInt :: Integer -> LambdaTerm
 toSimpleValueInt i = Variable ('_' : (show i))
 
 fromSimpleValueInt :: LambdaTerm -> Integer
 fromSimpleValueInt (Variable ('_' : i)) = read i
-fromSimpleValueInt lambdaTerm = throw (SimpleCalculatorException ("not int: " ++ show lambdaTerm))
+fromSimpleValueInt lambdaTerm = throw (LambdaExtensionCalculatorException ("not int: " ++ show lambdaTerm))
 
 toSimpleValueBool :: Bool -> LambdaTerm
 toSimpleValueBool True = Variable "_true"
@@ -42,7 +38,7 @@ toSimpleValueBool False = Variable "_false"
 fromSimpleValueBool :: LambdaTerm -> Bool
 fromSimpleValueBool (Variable "_true") = True
 fromSimpleValueBool (Variable "_false") = False
-fromSimpleValueBool lambdaTerm = throw (SimpleCalculatorException ("not bool: " ++ show lambdaTerm))
+fromSimpleValueBool lambdaTerm = throw (LambdaExtensionCalculatorException ("not bool: " ++ show lambdaTerm))
 
 
 matchFunction :: LambdaTerm -> IO LambdaTerm
@@ -115,8 +111,8 @@ matchFunction (Application (Variable "_char-to-int") arg1) = do
     let arg1stringval = fromSimpleValueString arg1val
     case arg1stringval of
         c : "" -> return (toSimpleValueInt (toInteger (ord c)))
-        "" -> throw (SimpleCalculatorException "char (string) length must be 1")
-        _ -> throw (SimpleCalculatorException "char (string) length must be 1")
+        "" -> throw (LambdaExtensionCalculatorException "char (string) length must be 1")
+        _ -> throw (LambdaExtensionCalculatorException "char (string) length must be 1")
 
 matchFunction (Application (Variable "_string-length") arg1) = do
     arg1val <- evalLambdaTerm arg1
@@ -234,44 +230,4 @@ evalLambdaTerm lambdaTerm = do
            else evalLambdaTerm result
 
 
-parseCodeFiles :: [String] -> IO ([ValDef])
-parseCodeFiles [] = return []
-parseCodeFiles (codeFile : codeFiles) = do
-    handle <- openFile codeFile ReadMode
-    hSetEncoding handle utf8
-    codeContent <- hGetContents handle
-    valDefList <- case runParseCode codeFile codeContent of
-        Right result -> return result
-        Left e -> throwIO $ CommandException ("parser error: " ++ show e)
-    valDefList' <- parseCodeFiles codeFiles
-    return (valDefList ++ valDefList')
-
-
-subcommand :: [String] -> IO ()
-subcommand args = do
-    let argList = parseArgs args
-    functionName <- case lookup "f" argList of
-        Just v -> return v
-        Nothing -> return "main"
-    calculateType <- case lookup "t" argList of
-        Just v -> return v
-        Nothing -> return "type1"
-    printResult <- case lookup "r" argList of
-        Just v -> return v
-        Nothing -> return "enable"
-
-    let codeFiles = map (\(_, value) -> value) (filter (\(name, _) -> (name == "")) argList)
-    valDefList <- parseCodeFiles codeFiles
-    let valDefMap = valDefListToMap valDefList
-    lambdaTerm <- case Map.lookup functionName valDefMap of
-        Just v -> return $ toLambdaTerm Set.empty valDefMap v
-        Nothing -> throwIO $ CommandException ("not found " ++ functionName)
-    case calculateType of
-        "type1" -> do
-            let result = calculateNormalResult lambdaTerm
-            if printResult == "enable" then print result else return ()
-        "type2" -> do
-            result <- evalLambdaTerm lambdaTerm
-            if printResult == "enable" then print result else return ()
-        unknownType -> throw $ CommandException ("unknown calculate type: " ++ unknownType)
 

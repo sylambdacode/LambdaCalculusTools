@@ -7,7 +7,6 @@
 - 支持对Lambda Cube表达式进行类型检查，支持自定义规则
 - Krivine Machine与Lazy Krivine Machine
 - 支持扩展语法的Lambda项文本解析器
-- 简单的编程语言（不支持垃圾回收）
 
 ## 基本使用方法
 
@@ -29,20 +28,6 @@ lambda-calculus-tools-main calculate -t type2 -f main2 lam-examples/reducation.l
 
 ```
 lambda-calculus-tools-main runKrivineMachine lam-examples/hello-world.lam lam-lib/*.lam
-```
-
-运行通过扩展Lambda演算而实现的的简单编程语言：
-
-循环打印Hello World
-
-```
-lambda-calculus-tools-main simplelang lam-examples/helloworld-loop.lam
-```
-
-猜数字小游戏
-
-```
-lambda-calculus-tools-main simplelang lam-examples/what-the-number-is.lam
 ```
 
 ## Lambda项文本解析器

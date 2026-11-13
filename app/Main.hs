@@ -5,9 +5,8 @@ SPDX-License-Identifier: MIT
 
 module Main where
 
-import qualified LambdaCalculusTools.CommandLineInterface.SimpleCalculator as SimpleCalculator
-import qualified LambdaCalculusTools.CommandLineInterface.SimpleLang as SimpleLang
-import qualified LambdaCalculusTools.CommandLineInterface.SimpleKrivineMachineRunner as SimpleKrivineMachineRunner
+import qualified LambdaCalculusTools.CommandLineInterface.SimpleCalculatorSubcommand as SimpleCalculatorSubcommand
+import qualified LambdaCalculusTools.CommandLineInterface.SimpleKrivineMachineRunnerSubcommand as SimpleKrivineMachineRunnerSubcommand
 import LambdaCalculusTools.CommandLineInterface.CommandException
 
 import System.Environment(getArgs)
@@ -22,12 +21,10 @@ mainHandler = do
         then throw $ CommandException "no mode"
         else return (args !! 0)
     case mode of
-        "runKrivineMachine" -> do
-            SimpleKrivineMachineRunner.subcommand (drop 1 args)
         "calculate" -> do
-            SimpleCalculator.subcommand (drop 1 args)
-        "simplelang" -> do
-            SimpleLang.subcommand (drop 1 args)
+            SimpleCalculatorSubcommand.subcommand (drop 1 args)
+        "runKrivineMachine" -> do
+            SimpleKrivineMachineRunnerSubcommand.subcommand (drop 1 args)
         _ -> throw $ CommandException ("unknown mode: " ++ mode)
 
 main :: IO ()
