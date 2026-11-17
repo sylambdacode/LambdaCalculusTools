@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT
 
 module LambdaCalculusTools.LambdaExtension.LambdaExtensionCalculator where
 
-import LambdaCalculusTools.UntypedLambdaCalculus.LambdaTerm (LambdaTerm (Variable, Application), alphaEq)
+import LambdaCalculusTools.UntypedLambdaCalculus.LambdaTerm (LambdaTerm (Variable, Application), alphaEq, readLambdaTerm)
 import LambdaCalculusTools.UntypedLambdaCalculus.LambdaReduction (calculateNormalResult, calculateWeakNormalHeadResult, isWeakNormalHeadForm)
 import LambdaCalculusTools.LambdaExtension.LambdaExtensionCalculatorException
 
@@ -56,6 +56,12 @@ matchFunction _ (Application (Application (Variable "_strict-normal") arg1) arg2
 matchFunction _ (Application (Variable "_lambda-term-to-string") arg1) = do
     let returnValue = show arg1
     return (toSimpleValueString returnValue)
+
+matchFunction continueEvalLambdaTerm (Application (Application (Variable "_string-to-lambda-term") arg1) arg2) = do
+    arg1Value <- evalLambdaTerm continueEvalLambdaTerm arg1
+    case readLambdaTerm (fromSimpleValueString arg1Value) of
+        Right lambdaTerm -> return (Application (Application (Application arg2 (toSimpleValueBool True)) (toSimpleValueString "")) lambdaTerm)
+        Left e -> return (Application (Application (Application arg2 (toSimpleValueBool False)) (toSimpleValueString e)) (Variable ""))
 
 matchFunction continueEvalLambdaTerm (Application (Variable "_output-string") arg1) = do
     arg1val <- evalLambdaTerm continueEvalLambdaTerm arg1
