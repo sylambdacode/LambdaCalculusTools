@@ -15,7 +15,7 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode))
 import Control.Exception (throw, throwIO)
-
+import Control.Monad.State (StateT (runStateT))
 
 parseCodeFiles :: [String] -> IO ([ValDef])
 parseCodeFiles [] = return []
@@ -54,7 +54,7 @@ subcommand args = do
             let result = calculateNormalResult lambdaTerm
             if printResult == "enable" then print result else return ()
         "type2" -> do
-            result <- evalLambdaTerm lambdaTerm
+            (result, _) <- runStateT (evalLambdaTerm return lambdaTerm) ()
             if printResult == "enable" then print result else return ()
         unknownType -> throw $ CommandException ("unknown calculate type: " ++ unknownType)
 
