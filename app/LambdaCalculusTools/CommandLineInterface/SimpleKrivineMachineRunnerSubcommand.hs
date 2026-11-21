@@ -15,11 +15,11 @@ import LambdaCalculusTools.CommandLineInterface.CommandException
 import LambdaCalculusTools.CommandLineInterface.CommandArg
 
 import qualified Data.Map as Map
-import qualified Data.Set as Set
 import GHC.TopHandler (flushStdHandles)
 import Control.Monad.State (StateT (runStateT), MonadIO (liftIO), MonadState (get, put))
 import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode), isEOF)
 import Control.Exception (throwIO)
+
 
 get1Or0Char :: IO Char
 get1Or0Char = do
@@ -90,13 +90,13 @@ subcommand args = do
         Right result -> return result
         Left e -> throwIO $ CommandException ("parser error: " ++ show e)
 
-    let valDefMap = valDefListToMap (wrapperValDefList ++ valDefList)
+    let lambdaTermMap = valDefListToLambdaTermMap (wrapperValDefList ++ valDefList)
 
-    mainLambdaTerm <- case Map.lookup "P___" valDefMap of
-        Just v -> return $ toLambdaTerm Set.empty valDefMap v
+    mainLambdaTerm <- case Map.lookup "P___" lambdaTermMap of
+        Just v -> return v
         Nothing -> throwIO $ CommandException "not found P___"
-    ioWrapper <- case Map.lookup "ioWrapper___" valDefMap of
-        Just v -> return $ toLambdaTerm Set.empty valDefMap v
+    ioWrapper <- case Map.lookup "ioWrapper___" lambdaTermMap of
+        Just v -> return v
         Nothing -> throwIO $ CommandException "not found ioWrapper___"
     
     let globalFreeVariableMap = Map.fromList [("O0___", -1), ("O1___", -2), ("input___", -3)]

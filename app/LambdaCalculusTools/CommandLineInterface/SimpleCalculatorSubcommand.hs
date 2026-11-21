@@ -12,10 +12,10 @@ import LambdaCalculusTools.CommandLineInterface.CommandArg
 import LambdaCalculusTools.LambdaExtension.LambdaExtensionCalculator
 
 import qualified Data.Map as Map
-import qualified Data.Set as Set
 import System.IO (openFile, hSetEncoding, hGetContents, utf8, IOMode(ReadMode))
 import Control.Exception (throw, throwIO)
 import Control.Monad.State (StateT (runStateT))
+
 
 parseCodeFiles :: [String] -> IO ([ValDef])
 parseCodeFiles [] = return []
@@ -45,9 +45,9 @@ subcommand args = do
 
     let codeFiles = map (\(_, value) -> value) (filter (\(name, _) -> (name == "")) argList)
     valDefList <- parseCodeFiles codeFiles
-    let valDefMap = valDefListToMap valDefList
-    lambdaTerm <- case Map.lookup functionName valDefMap of
-        Just v -> return $ toLambdaTerm Set.empty valDefMap v
+    let lambdaTermMap = valDefListToLambdaTermMap valDefList
+    lambdaTerm <- case Map.lookup functionName lambdaTermMap of
+        Just v -> return v
         Nothing -> throwIO $ CommandException ("not found " ++ functionName)
     case calculateType of
         "type1" -> do

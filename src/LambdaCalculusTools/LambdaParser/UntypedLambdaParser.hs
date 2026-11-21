@@ -159,6 +159,10 @@ toLambdaTerm varSet valDefMap (Cps ((CpsItem names expr) : xs) finalExprs) =
 toLambdaTerm varSet valDefMap (Let valDefs expr) = toLetLambdaTerm varSet valDefMap handledLetExpression
     where handledLetExpression = handleLetExpression (Let valDefs expr)
 
-valDefListToMap :: [ValDef] -> Map String Expr
-valDefListToMap valDefList = Map.fromList (map valDefToPair valDefList)
+valDefListToExprMap :: [ValDef] -> Map String Expr
+valDefListToExprMap valDefList = Map.fromList (map valDefToPair valDefList)
     where valDefToPair (ValDef name expr) = (name, expr)
+
+valDefListToLambdaTermMap :: [ValDef] -> Map String LambdaTerm
+valDefListToLambdaTermMap valDefList = Map.map (toLambdaTerm Set.empty exprMap) exprMap
+    where exprMap = valDefListToExprMap valDefList
